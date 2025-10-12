@@ -9,10 +9,10 @@ include_directories(demos)
 find_package(Python 3.8 COMPONENTS Interpreter Development REQUIRED)
 
 execute_process(
-  COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmakedir
-  OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE PYBIND11_DIR)
-list(APPEND CMAKE_PREFIX_PATH "${PYBIND11_DIR}")
-find_package(pybind11 CONFIG REQUIRED)
+  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+  OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE NANOBIND_DIR)
+list(APPEND CMAKE_PREFIX_PATH "${NANOBIND_DIR}")
+find_package(nanobind CONFIG REQUIRED)
 
 
 if(WIN32)
@@ -28,7 +28,8 @@ find_package(LAPACK REQUIRED)
 add_subdirectory (demos)
 
 
-pybind11_add_module(nanoblas src/bind_bla.cpp)
+nanobind_add_module(nanoblas src/bind_bla.cpp)
+target_link_libraries(nanoblas PRIVATE LAPACK::LAPACK)
 
 install (TARGETS nanoblas DESTINATION nanoblas)
 install (FILES src/vector.hpp DESTINATION nanoblas/include)

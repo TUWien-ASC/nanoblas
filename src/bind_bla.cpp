@@ -1,15 +1,14 @@
 #include <sstream>
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 #include "vector.hpp"
 
 using namespace nanoblas;
-namespace py = pybind11;
+namespace py = nanobind;
 
 
 
-
-PYBIND11_MODULE(nanoblas, m) {
+NB_MODULE(nanoblas, m) {
     m.doc() = "Basic linear algebra module"; // optional module docstring
     
     py::class_<Vector<double>> (m, "Vector")
@@ -27,9 +26,12 @@ PYBIND11_MODULE(nanoblas, m) {
       
       .def("__setitem__", [](Vector<double> & self, py::slice inds, double val)
       {
+        /*
         size_t start, stop, step, n;
         if (!inds.compute(self.size(), &start, &stop, &step, &n))
           throw py::error_already_set();
+        */
+        auto [start, stop, step, slice_length] = inds.compute(self.size());
         self.range(start, stop).slice(0,step) = val;
       })
       
@@ -46,9 +48,10 @@ PYBIND11_MODULE(nanoblas, m) {
         return str.str();
       })
 
+      /*
      .def(py::pickle(
         [](Vector<double> & self) { // __getstate__
-            /* return a tuple that fully encodes the state of the object */
+          // return a tuple that fully encodes the state of the object 
           return py::make_tuple(self.size(),
                                 py::bytes((char*)(void*)&self(0), self.size()*sizeof(double)));
         },
@@ -61,5 +64,6 @@ PYBIND11_MODULE(nanoblas, m) {
           std::memcpy(&v(0), PYBIND11_BYTES_AS_STRING(mem.ptr()), v.size()*sizeof(double));
           return v;
         }))
+      */
     ;
 }
