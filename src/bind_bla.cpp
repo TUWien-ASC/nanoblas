@@ -1,5 +1,6 @@
 #include <sstream>
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 
 #include "vector.hpp"
 
@@ -26,17 +27,17 @@ NB_MODULE(nanoblas_impl, m) {
       
       .def("__setitem__", [](Vector<double> & self, py::slice inds, double val)
       {
-        /*
-        size_t start, stop, step, n;
-        if (!inds.compute(self.size(), &start, &stop, &step, &n))
-          throw py::error_already_set();
-        */
         auto [start, stop, step, slice_length] = inds.compute(self.size());
         self.range(start, stop).slice(0,step) = val;
       })
       
       .def("__add__", [](Vector<double> & self, Vector<double> & other)
-      { return Vector<double> (self+other); })
+      { 
+        if (self.size() != other.size())
+          throw std::runtime_error("Vector sizes do not match: " + std::to_string(self.size()) + " and " + std::to_string(other.size()));
+  
+        return Vector<double> (self+other); 
+      })
 
       .def("__rmul__", [](Vector<double> & self, double scal)
       { return Vector<double> (scal*self); })
