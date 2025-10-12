@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
-project(ASC_bla)
+project(nanoblas)
 
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 20)
 
 include_directories(src)
 include_directories(demos)
@@ -24,16 +24,14 @@ endif()
 
 
 find_package(LAPACK REQUIRED)
-add_executable (demo_lapack demos/demo_lapack.cpp)
-target_link_libraries (demo_lapack PUBLIC LAPACK::LAPACK)
 
 add_subdirectory (demos)
 
 
-pybind11_add_module(bla src/bind_bla.cpp)
+pybind11_add_module(nanoblas src/bind_bla.cpp)
 
-install (TARGETS bla DESTINATION ASCsoft)
-install (FILES src/vector.hpp DESTINATION ASCsoft/include)
+install (TARGETS nanoblas DESTINATION nanoblas)
+install (FILES src/vector.hpp DESTINATION nanoblas/include)
 
 
 # Copy openblas dll file to build directory (no need to set PATH)

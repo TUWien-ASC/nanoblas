@@ -69,8 +69,10 @@ namespace nanoblas
     size_t cols() const { return b.cols(); }
     
     auto operator() (size_t i, size_t j) const { 
-      using elemtypeA = typename std::result_of<decltype(&operator())(TA,size_t,size_t)>::type;
-      using elemtypeB = typename std::result_of<decltype(&operator())(TB,size_t,size_t)>::type;
+      // using elemtypeA = typename std::result_of<decltype(&operator())(TA,size_t,size_t)>::type;
+      // using elemtypeB = typename std::result_of<decltype(&operator())(TB,size_t,size_t)>::type;
+      using elemtypeA = typename std::invoke_result<decltype(&operator())(TA,size_t,size_t)>::type;
+      using elemtypeB = typename std::invoke_result<decltype(&operator())(TB,size_t,size_t)>::type;
       using TSCAL = decltype(std::declval<elemtypeA>()*std::declval<elemtypeB>());
       
       TSCAL sum = 0;

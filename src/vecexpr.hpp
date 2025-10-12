@@ -4,6 +4,15 @@
 namespace nanoblas
 {
 
+  template<typename T>
+  concept Scalar = std::integral<T> || std::floating_point<T> || 
+    requires(T t) {
+      typename T::value_type;
+      { t.real() } -> std::floating_point;
+      { t.imag() } -> std::floating_point;
+  };
+
+
   template <typename T>
   class VecExpr
   {
@@ -36,7 +45,6 @@ namespace nanoblas
                                " (in operator+).");     
 #endif  
 
-    
     return SumVecExpr(a.upcast(), b.upcast());
   }
 
@@ -50,13 +58,13 @@ namespace nanoblas
     TV vec;
   public:
     ScaleVecExpr (TSCAL _scal, TV _vec) : scal(_scal), vec(_vec) { }
-
     auto operator() (size_t i) const { return scal*vec(i); }
     size_t size() const { return vec.size(); }      
   };
   
-  template <typename T>
-  auto operator* (double scal, const VecExpr<T> & v)
+  template <typename TSCAL, typename T>
+  requires Scalar<TSCAL>
+  auto operator* (TSCAL scal, const VecExpr<T> & v)
   {
     return ScaleVecExpr(scal, v.upcast());
   }

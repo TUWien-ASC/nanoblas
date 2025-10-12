@@ -9,7 +9,7 @@ namespace py = pybind11;
 
 
 
-PYBIND11_MODULE(bla, m) {
+PYBIND11_MODULE(nanoblas, m) {
     m.doc() = "Basic linear algebra module"; // optional module docstring
     
     py::class_<Vector<double>> (m, "Vector")
