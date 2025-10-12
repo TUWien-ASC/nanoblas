@@ -7,3 +7,6 @@ target_sources (demo_matrix PUBLIC ../src/matrix.hpp
 target_link_libraries (demo_matrix PUBLIC LAPACK::LAPACK)
 
 
+add_executable (demo_lapack demo_lapack.cpp)
+target_link_libraries (demo_lapack PUBLIC LAPACK::LAPACK)
+

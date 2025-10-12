@@ -8,10 +8,10 @@ if 'win32' in sys.platform:
 
     
 setup(
-    name="ASCsoft",
-    version="0.0.2",
+    name="nanoblas",
+    version="1.0.0",
     author="J. Schoeberl",
     license="MIT",
-    packages=["ASCsoft"],
+    packages=["nanoblas"],
     cmake_args=_cmake_args
 )
