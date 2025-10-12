@@ -28,10 +28,10 @@ find_package(LAPACK REQUIRED)
 add_subdirectory (demos)
 
 
-nanobind_add_module(nanoblas src/bind_bla.cpp)
-target_link_libraries(nanoblas PRIVATE LAPACK::LAPACK)
+nanobind_add_module(nanoblas_impl src/bind_bla.cpp)
+target_link_libraries(nanoblas_impl PRIVATE LAPACK::LAPACK)
 
-install (TARGETS nanoblas DESTINATION nanoblas)
+install (TARGETS nanoblas_impl DESTINATION nanoblas)
 install (FILES src/vector.hpp DESTINATION nanoblas/include)
 
 
