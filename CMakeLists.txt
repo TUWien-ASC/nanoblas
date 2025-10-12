@@ -15,8 +15,6 @@ list(APPEND CMAKE_PREFIX_PATH "${PYBIND11_DIR}")
 find_package(pybind11 CONFIG REQUIRED)
 
 
-add_subdirectory (demos)
-
 if(WIN32)
    file (DOWNLOAD https://sourceforge.net/projects/openblas/files/v0.3.24/OpenBLAS-0.3.24-x64.zip/download "${CMAKE_BINARY_DIR}/openblas.zip" EXPECTED_MD5 fc08fe8c0dc7364da115d0e09b5a134f)
    file (ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/openblas.zip DESTINATION ${CMAKE_BINARY_DIR}/openblas)
@@ -25,10 +23,11 @@ if(WIN32)
 endif()
 
 
-
 find_package(LAPACK REQUIRED)
 add_executable (demo_lapack demos/demo_lapack.cpp)
 target_link_libraries (demo_lapack PUBLIC LAPACK::LAPACK)
+
+add_subdirectory (demos)
 
 
 pybind11_add_module(bla src/bind_bla.cpp)

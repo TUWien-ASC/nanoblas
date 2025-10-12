@@ -5,7 +5,7 @@
 #include <string>
 
 #include "vector.hpp"
-
+#include "matrix.hpp"
 
 
 #include <complex>
@@ -61,7 +61,6 @@ namespace nanoblas
   // doublereal *b, integer *ldb, doublereal *beta, doublereal *c__, 
   // integer *ldc);
 
-  /*  
   // c = a*b
   template <ORDERING OA, ORDERING OB>
   void MultMatMatLapack (MatrixView<double, OA> a,
@@ -71,32 +70,32 @@ namespace nanoblas
     char transa_ = (OA == ColMajor) ? 'N' : 'T';
     char transb_ = (OB == ColMajor) ? 'N' : 'T'; 
   
-    integer n = c.Height();
-    integer m = c.Width();
-    integer k = a.Width();
+    integer n = c.rows();
+    integer m = c.cols();
+    integer k = a.cols();
   
     double alpha = 1.0;
     double beta = 0;
-    integer lda = std::max(a.Dist(), 1ul);
-    integer ldb = std::max(b.Dist(), 1ul);
-    integer ldc = std::max(c.Dist(), 1ul);
+    integer lda = std::max(a.dist(), 1ul);
+    integer ldb = std::max(b.dist(), 1ul);
+    integer ldc = std::max(c.dist(), 1ul);
 
     int err =
       dgemm_ (&transa_, &transb_, &n, &m, &k, &alpha, 
-              a.Data(), &lda, b.Data(), &ldb, &beta, c.Data(), &ldc);
+              a.data(), &lda, b.data(), &ldb, &beta, c.data(), &ldc);
 
     if (err != 0)
       throw std::runtime_error(std::string("MultMatMat got error "+std::to_string(err)));
   }
                        
   template <ORDERING OA, ORDERING OB>
-  int MultMatMatLapack (MatrixView<double, OA> a,
-                        MatrixView<double, OB> b,
-                        MatrixView<double, RowMajor> c)
+  void MultMatMatLapack (MatrixView<double, OA> a,
+                         MatrixView<double, OB> b,
+                         MatrixView<double, RowMajor> c)
   {
     MultMatMatLapack (Trans(b), Trans(a), Trans(c));
   }
-  */
+
 
   
 

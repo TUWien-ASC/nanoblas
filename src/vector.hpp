@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "expression.hpp"
+#include "vecexpr.hpp"
 
 
 namespace nanoblas
