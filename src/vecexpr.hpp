@@ -44,8 +44,51 @@ namespace nanoblas
                                "sizeof "+ std::to_string(a.size()) + " and " + std::to_string(b.size()) +    
                                " (in operator+).");     
 #endif  
-
     return SumVecExpr(a.upcast(), b.upcast());
+  }
+
+
+  template <typename TA, typename TB>
+  class SubVecExpr : public VecExpr<SubVecExpr<TA,TB>>
+  {
+    TA a;
+    TB b;
+  public:
+    SubVecExpr (TA _a, TB _b) : a(_a), b(_b) { }
+
+    auto operator() (size_t i) const { return a(i)-b(i); }
+    size_t size() const { return a.size(); }      
+  };
+  
+  template <typename TA, typename TB>
+  auto operator- (const VecExpr<TA> & a, const VecExpr<TB> & b)
+  {
+#ifndef NDEBUG
+    if (a.size() != b.size())
+      throw std::runtime_error("Vector sizes do not match for addition" 
+                               "sizeof "+ std::to_string(a.size()) + " and " + std::to_string(b.size()) +    
+                               " (in operator-).");     
+#endif  
+    return SubVecExpr(a.upcast(), b.upcast());
+  }
+
+
+
+  template <typename TA>
+  class NegVecExpr : public VecExpr<NegVecExpr<TA>>
+  {
+    TA a;
+  public:
+    NegVecExpr (TA _a) : a(_a) { }
+
+    auto operator() (size_t i) const { return -a(i); }
+    size_t size() const { return a.size(); }      
+  };
+  
+  template <typename TA>
+  auto operator- (const VecExpr<TA> & a)
+  {
+    return NegVecExpr(a.upcast());
   }
 
 

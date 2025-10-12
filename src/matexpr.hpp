@@ -69,10 +69,8 @@ namespace nanoblas
     size_t cols() const { return b.cols(); }
     
     auto operator() (size_t i, size_t j) const { 
-      // using elemtypeA = typename std::result_of<decltype(&operator())(TA,size_t,size_t)>::type;
-      // using elemtypeB = typename std::result_of<decltype(&operator())(TB,size_t,size_t)>::type;
-      using elemtypeA = typename std::invoke_result<decltype(&operator())(TA,size_t,size_t)>::type;
-      using elemtypeB = typename std::invoke_result<decltype(&operator())(TB,size_t,size_t)>::type;
+      using elemtypeA = std::invoke_result<TA,size_t,size_t>::type;
+      using elemtypeB = std::invoke_result<TB,size_t,size_t>::type;
       using TSCAL = decltype(std::declval<elemtypeA>()*std::declval<elemtypeB>());
       
       TSCAL sum = 0;
@@ -88,5 +86,40 @@ namespace nanoblas
     return MultMatMatExpr<TA,TB>(a.upcast(), b.upcast());
   }
   
+
+
+
+
+ template <typename TA, typename TB>
+  class MultMatVecExpr : public VecExpr<MultMatVecExpr<TA,TB>>
+  {
+    TA a;
+    TB b;
+  public:
+    MultMatVecExpr (TA _a, TB _b) : a(_a), b(_b) { }
+    size_t size() const { return a.rows(); }
+    
+    auto operator() (size_t i) const { 
+      using elemtypeA = std::invoke_result<TA,size_t,size_t>::type;
+      using elemtypeB = std::invoke_result<TB,size_t>::type;
+      using TSCAL = decltype(std::declval<elemtypeA>()*std::declval<elemtypeB>());
+      
+      TSCAL sum = 0;
+      for (size_t k = 0; k < a.cols(); k++)
+        sum += a(i,k) * b(k); 
+      return sum;
+    }
+  };
+
+  template <typename TA, typename TB>
+  auto operator* (const MatExpr<TA> & a, const VecExpr<TB> & b)
+  {
+    return MultMatVecExpr<TA,TB>(a.upcast(), b.upcast());
+  }
+ 
+
+
+
 } // namespace nanoblas
+
 #endif

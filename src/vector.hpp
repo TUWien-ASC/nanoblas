@@ -22,7 +22,7 @@ namespace nanoblas
     
     template <typename TDIST2>
     VectorView (const VectorView<T,TDIST2> & v2)
-      : data_(v2.Data()), size_(v2.Size()), dist_(v2.Dist()) { }
+      : data_(v2.data()), size_(v2.size()), dist_(v2.dist()) { }
     
     VectorView (size_t size, T * data)
       : data_(data), size_(size) { }
@@ -59,7 +59,22 @@ namespace nanoblas
     auto slice(size_t first, size_t slice) const {
       return VectorView<T,size_t> (size_/slice, dist_*slice, data_+first*dist_);
     }
-      
+
+    template <typename TB>
+    VectorView & operator+= (const VecExpr<TB> & v2)
+    {
+      for (size_t i = 0; i < size_; i++)
+        data_[dist_*i] += v2(i);
+      return *this;
+    }
+
+    template <typename TB>
+    VectorView & operator-= (const VecExpr<TB> & v2)
+      {
+        for (size_t i = 0; i < size_; i++)
+          data_[dist_*i] -= v2(i);
+        return *this;
+      }
   };
   
   

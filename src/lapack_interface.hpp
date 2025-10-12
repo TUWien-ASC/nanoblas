@@ -53,7 +53,37 @@ namespace nanoblas
   
   
   // BLAS-2 functions:
+  // int dgemv_ (char *trans, integer *m, integer *n, doublereal *alpha,
+  //             doublereal *a, integer *lda, doublereal *x, integer *incx,
+  //             doublereal *beta, doublereal *y, integer *incy);
 
+  // y = alpha*A*x + beta*y
+  template <typename T, ORDERING ORD>
+  void MultMatVecLapack (double alpha,
+                          MatrixView<T,ORD> a, 
+                          VectorView<T,size_t> x, 
+                          double beta, 
+                          VectorView<T,size_t> y)
+   {
+     char transa = (ORD == ColMajor) ? 'N' : 'T';
+
+     integer n = a.rows();
+     integer m = a.cols();
+     integer lda = std::max(a.dist(), 1ul);
+
+     integer dx = std::max(x.dist(), 1ul);
+     integer dy = std::max(y.dist(), 1ul);
+
+      int err =
+       dgemv_(&transa,
+           &n, &m,
+           &alpha,
+           a.data(), &lda,
+           x.data(), &dx,
+           &beta,
+           y.data(), &dy);
+   }
+   
   // BLAS-3 functions:
   
   // int dgemm_ (char *transa, char *transb, integer *m, integer * n,
