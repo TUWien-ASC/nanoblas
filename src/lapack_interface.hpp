@@ -85,17 +85,39 @@ namespace nanoblas
    }
    
   // BLAS-3 functions:
+  // overload for float, double and comlex<double>
   
-  // int dgemm_ (char *transa, char *transb, integer *m, integer * n,
-  // integer *k, doublereal *alpha, doublereal *a, integer *lda, 
-  // doublereal *b, integer *ldb, doublereal *beta, doublereal *c__, 
-  // integer *ldc);
+  inline int gemm(char *transa, char *transb, integer *m, integer *
+                  n, integer *k, real *alpha, real *a, integer *lda,
+                  real *b, integer *ldb, real *beta, real *c__,
+                  integer *ldc)
+  {
+    return sgemm_ (transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c__, ldc);
+  }
+  
+  inline int gemm(char *transa, char *transb, integer *m, integer *
+                  n, integer *k, doublereal *alpha, doublereal *a, integer *lda,
+                  doublereal *b, integer *ldb, doublereal *beta, doublereal *c__,
+                  integer *ldc)
+  {
+    return dgemm_ (transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c__, ldc);
+  }
+  
+  inline int gemm(char *transa, char *transb, integer *m, integer *
+                  n, integer *k, doublecomplex *alpha, doublecomplex *a, integer *lda,
+                  doublecomplex *b, integer *ldb, doublecomplex *beta, doublecomplex *
+                  c__, integer *ldc)
+  {
+    return zgemm_ (transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c__, ldc);
+  }
+
+
 
   // c = a*b
-  template <ORDERING OA, ORDERING OB>
-  void MultMatMatLapack (MatrixView<double, OA> a,
-                         MatrixView<double, OB> b,
-                         MatrixView<double, ColMajor> c)
+  template <typename T, ORDERING OA, ORDERING OB>
+  void MultMatMatLapack (MatrixView<T, OA> a,
+                         MatrixView<T, OB> b,
+                         MatrixView<T, ColMajor> c)
   {
     char transa_ = (OA == ColMajor) ? 'N' : 'T';
     char transb_ = (OB == ColMajor) ? 'N' : 'T'; 
@@ -111,8 +133,8 @@ namespace nanoblas
     integer ldc = std::max(c.dist(), 1ul);
 
     int err =
-      dgemm_ (&transa_, &transb_, &n, &m, &k, &alpha, 
-              a.data(), &lda, b.data(), &ldb, &beta, c.data(), &ldc);
+      gemm (&transa_, &transb_, &n, &m, &k, &alpha, 
+            a.data(), &lda, b.data(), &ldb, &beta, c.data(), &ldc);
 
     if (err != 0)
       throw std::runtime_error(std::string("MultMatMat got error "+std::to_string(err)));

@@ -8,7 +8,7 @@ namespace bla = nanoblas;
 int main()
 {
   size_t n = 10;
-  bla::Vector<double> x(n), y(n);
+  bla::Vector<double> x(n), y(n+1);
 
   for (size_t i = 0; i < x.size(); i++) 
     {

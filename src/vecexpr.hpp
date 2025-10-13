@@ -1,17 +1,21 @@
 #ifndef FILE_EXPRESSION
 #define FILE_EXPRESSION
 
+#include<complex>
+#include<cassert>
+#include <type_traits>
+
 namespace nanoblas
 {
 
-  template<typename T>
-  concept Scalar = std::integral<T> || std::floating_point<T> || 
-    requires(T t) {
-      typename T::value_type;
-      { t.real() } -> std::floating_point;
-      { t.imag() } -> std::floating_point;
-  };
 
+  /*
+    Expression templates for vector expressions
+    
+    VecExpr is the basis for all vector expressions
+    Uses compile-time polymorphism, known as
+    Curiously recurring template pattern (CRTP)
+  */
 
   template <typename T>
   class VecExpr
@@ -21,7 +25,10 @@ namespace nanoblas
     size_t size() const { return upcast().size(); }
     auto operator() (size_t i) const { return upcast()(i); }
   };
+
   
+
+  // ************************ SumVecExpr *********************
  
   template <typename TA, typename TB>
   class SumVecExpr : public VecExpr<SumVecExpr<TA,TB>>
@@ -38,16 +45,13 @@ namespace nanoblas
   template <typename TA, typename TB>
   auto operator+ (const VecExpr<TA> & a, const VecExpr<TB> & b)
   {
-#ifndef NDEBUG
-    if (a.size() != b.size())
-      throw std::runtime_error("Vector sizes do not match for addition" 
-                               "sizeof "+ std::to_string(a.size()) + " and " + std::to_string(b.size()) +    
-                               " (in operator+).");     
-#endif  
+    assert(a.size()==b.size());
     return SumVecExpr(a.upcast(), b.upcast());
   }
 
 
+  // ************************ SubVecExpr *********************
+  
   template <typename TA, typename TB>
   class SubVecExpr : public VecExpr<SubVecExpr<TA,TB>>
   {
@@ -63,17 +67,14 @@ namespace nanoblas
   template <typename TA, typename TB>
   auto operator- (const VecExpr<TA> & a, const VecExpr<TB> & b)
   {
-#ifndef NDEBUG
-    if (a.size() != b.size())
-      throw std::runtime_error("Vector sizes do not match for addition" 
-                               "sizeof "+ std::to_string(a.size()) + " and " + std::to_string(b.size()) +    
-                               " (in operator-).");     
-#endif  
+    assert(a.size()==b.size());    
     return SubVecExpr(a.upcast(), b.upcast());
   }
 
 
+  // ************************ NegVecExpr *********************
 
+  
   template <typename TA>
   class NegVecExpr : public VecExpr<NegVecExpr<TA>>
   {
@@ -93,6 +94,19 @@ namespace nanoblas
 
 
 
+  // ************************ ScaleVecExpr *********************
+  
+
+  template <typename T>
+  struct is_scalar_type { static constexpr bool value = std::integral<T>||std::floating_point<T>; };
+  
+  template <typename T>
+  constexpr bool isScalar () { return is_scalar_type<T>::value; }
+
+  template <typename T>
+  struct is_scalar_type<std::complex<T>> { static constexpr bool value = isScalar<T>(); };
+
+
   
   template <typename TSCAL, typename TV>
   class ScaleVecExpr : public VecExpr<ScaleVecExpr<TSCAL,TV>>
@@ -104,15 +118,24 @@ namespace nanoblas
     auto operator() (size_t i) const { return scal*vec(i); }
     size_t size() const { return vec.size(); }      
   };
+
+
+  /*
+  // C++17 needs the enable_if workaround instead of the 'requires' concept syntax
+  template <typename TSCAL, typename T,
+            typename std::enable_if<isScalar<TSCAL>(),int>::type = 0>
+  */
+
   
-  template <typename TSCAL, typename T>
-  requires Scalar<TSCAL>
+  template <typename TSCAL, typename T> requires (isScalar<TSCAL>())
   auto operator* (TSCAL scal, const VecExpr<T> & v)
   {
     return ScaleVecExpr(scal, v.upcast());
   }
 
 
+  // ***********************  output operator  *********************
+  
 
   template <typename T>
   std::ostream & operator<< (std::ostream & ost, const VecExpr<T> & v)

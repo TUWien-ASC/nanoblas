@@ -9,6 +9,14 @@
 namespace nanoblas
 {
 
+  /*
+    Expression templates for matrix expressions
+    and matrix-vector expressions
+  */
+  
+  
+  // base class for all matrix expressions
+  
   template <typename T>
   class MatExpr
   {
@@ -19,7 +27,8 @@ namespace nanoblas
     auto operator() (size_t i, size_t j) const { return upcast()(i,j); }
   };
   
-
+  // ************************* output operator *******************
+  
   template <typename TM>
   std::ostream & operator<< (std::ostream & os, const MatExpr<TM> & m)
   {
@@ -31,6 +40,9 @@ namespace nanoblas
       }
     return os;
   }
+
+
+  // ************************* SumMatExpr *******************  
 
   template <typename TA, typename TB>
   class SumMatExpr : public MatExpr<SumMatExpr<TA,TB>>
@@ -47,17 +59,14 @@ namespace nanoblas
   template <typename TA, typename TB>
   auto operator+ (const MatExpr<TA> & a, const MatExpr<TB> & b)
   {
-#ifndef NDEBUG
-    if (a.rows() != b.rows() || a.cols() != b.cols())
-      throw std::runtime_error("Matrix sizes do not match for addition, " 
-                               "sizeof "+ std::to_string(a.rows())+"x"+std::to_string(a.cols()) + 
-                               " and " + std::to_string(b.rows())+"x"+std::to_string(b.cols()) +    
-                               " (in operator+).");     
-#endif  
+    assert(a.rows()==b.rows() && a.cols()==b.cols());
     return SumMatExpr(a.upcast(), b.upcast());
   }
 
+  
 
+  // ************************* MultMatMatExpr *******************
+  
   template <typename TA, typename TB>
   class MultMatMatExpr : public MatExpr<MultMatMatExpr<TA,TB>>
   {
@@ -83,12 +92,13 @@ namespace nanoblas
   template <typename TA, typename TB>
   auto operator* (const MatExpr<TA> & a, const MatExpr<TB> & b)
   {
+    assert(a.cols()==b.rows());
     return MultMatMatExpr<TA,TB>(a.upcast(), b.upcast());
   }
   
 
 
-
+  // ************************* MultMatVecExpr *******************
 
  template <typename TA, typename TB>
   class MultMatVecExpr : public VecExpr<MultMatVecExpr<TA,TB>>
@@ -114,6 +124,7 @@ namespace nanoblas
   template <typename TA, typename TB>
   auto operator* (const MatExpr<TA> & a, const VecExpr<TB> & b)
   {
+    assert(a.cols()==b.size());    
     return MultMatVecExpr<TA,TB>(a.upcast(), b.upcast());
   }
  
