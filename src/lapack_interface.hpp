@@ -60,29 +60,29 @@ namespace nanoblas
   // y = alpha*A*x + beta*y
   template <typename T, ORDERING ORD>
   void MultMatVecLapack (double alpha,
-                          MatrixView<T,ORD> a, 
-                          VectorView<T,size_t> x, 
-                          double beta, 
-                          VectorView<T,size_t> y)
-   {
-     char transa = (ORD == ColMajor) ? 'N' : 'T';
+                         MatrixView<T,ORD> a, 
+                         VectorView<T,size_t> x, 
+                         double beta, 
+                         VectorView<T,size_t> y)
+  {
+    char transa = (ORD == ColMajor) ? 'N' : 'T';
 
-     integer n = a.rows();
-     integer m = a.cols();
-     integer lda = std::max(a.dist(), 1ul);
+    integer n = a.rows();
+    integer m = a.cols();
+    integer lda = std::max(a.dist(), 1ul);
 
-     integer dx = std::max(x.dist(), 1ul);
-     integer dy = std::max(y.dist(), 1ul);
+    integer dx = std::max(x.dist(), 1ul);
+    integer dy = std::max(y.dist(), 1ul);
 
-      int err =
-       dgemv_(&transa,
-           &n, &m,
-           &alpha,
-           a.data(), &lda,
-           x.data(), &dx,
-           &beta,
-           y.data(), &dy);
-   }
+    int err =
+      dgemv_(&transa,
+             &n, &m,
+             &alpha,
+             a.data(), &lda,
+             x.data(), &dx,
+             &beta,
+             y.data(), &dy);
+  }
    
   // BLAS-3 functions:
   // overload for float, double and comlex<double>
@@ -151,7 +151,6 @@ namespace nanoblas
 
   
 
-  /*
   template <ORDERING ORD>
   class LapackLU {
     Matrix <double, ORD> a;
@@ -159,11 +158,11 @@ namespace nanoblas
     
   public:
     LapackLU (Matrix<double,ORD> _a)
-      : a(std::move(_a)), ipiv(a.Height()) {
-      integer m = a.Height();
+      : a(std::move(_a)), ipiv(a.rows()) {
+      integer m = a.rows();
       if (m == 0) return;
-      integer n = a.Width();
-      integer lda = a.Dist();
+      integer n = a.cols();
+      integer lda = a.dist();
       integer info;
     
       // int dgetrf_(integer *m, integer *n, doublereal *a, 
@@ -177,22 +176,22 @@ namespace nanoblas
       char transa =  (ORD == ColMajor) ? 'N' : 'T';
       integer n = a.Height();
       integer nrhs = 1;
-      integer lda = a.Dist();
-      integer ldb = b.Size();
+      integer lda = a.dist();
+      integer ldb = b.size();
       integer info;
 
       // int dgetrs_(char *trans, integer *n, integer *nrhs, 
       //             doublereal *a, integer *lda, integer *ipiv,
       //             doublereal *b, integer *ldb, integer *info);
 
-      dgetrs_(&transa, &n, &nrhs, a.Data(), &lda, (integer*)ipiv.data(), b.Data(), &ldb, &info);
+      dgetrs_(&transa, &n, &nrhs, a.data(), &lda, (integer*)ipiv.data(), b.data(), &ldb, &info);
     }
   
     Matrix<double,ORD> Inverse() && {
       double hwork;
       integer lwork = -1;
-      integer n = a.Height();      
-      integer lda = a.Dist();
+      integer n = a.rows();      
+      integer lda = a.dist();
       integer info;
 
       // int dgetri_(integer *n, doublereal *a, integer *lda, 
@@ -211,8 +210,6 @@ namespace nanoblas
     // Matrix<double,ORD> UFactor() const { ... }
     // Matrix<double,ORD> PFactor() const { ... }
   };
-  */ 
-
   
 }
 

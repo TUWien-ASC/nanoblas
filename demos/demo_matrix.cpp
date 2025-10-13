@@ -24,4 +24,17 @@ int main()
   std::cout << "A = \n" << A << std::endl;
   std::cout << "B = \n" << B << std::endl;
   std::cout << "C = A * B = \n" << C << std::endl;
+
+
+  int n = 3;
+  Matrix<double> a(n,n);
+  for (int i = 0; i < n; i++)
+    a(i,i) = 2;
+  for (int i = 1; i < n; i++)
+    a(i-1,i) = a(i,i-1) = -1;
+
+  std::cout << "a = " << a << std::endl;
+
+  std::cout << "Inv(a) = " << LapackLU(a).Inverse() << std::endl;
+  
 }

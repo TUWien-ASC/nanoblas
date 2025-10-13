@@ -92,7 +92,7 @@ namespace nanoblas
       : BASE(rows, cols, new T[rows*cols]), own_data_(BASE::data()) { }
           
     Matrix (const Matrix & m2)
-      : BASE(m2.Rows(), m2.Cols(), new T[m2.Rows()*m2.Cols()]),
+      : BASE(m2.rows(), m2.cols(), new T[m2.rows()*m2.cols()]),
         own_data_(BASE::data())
     {
       *this = m2;
@@ -105,7 +105,7 @@ namespace nanoblas
     {
       if (this != &m2)
         {
-          if (rows_ != m2.Rows() || cols_ != m2.Cols())
+          if (rows_ != m2.rows() || cols_ != m2.cols())
             throw std::runtime_error("Matrix assignment: incompatible sizes");
           BASE::operator=(m2);
         }
