@@ -21,10 +21,11 @@ namespace nanoblas
   class MatExpr
   {
   public:
-    auto upcast() const { return static_cast<const T&> (*this); }
-    size_t rows() const { return upcast().rows(); }
-    size_t cols() const { return upcast().cols(); }
-    auto operator() (size_t i, size_t j) const { return upcast()(i,j); }
+    auto derived() const { return static_cast<const T&> (*this); }
+    size_t rows() const { return derived().rows(); }
+    size_t cols() const { return derived().cols(); }
+    auto shape() const { return derived().shape(); }
+    auto operator() (size_t i, size_t j) const { return derived()(i,j); }
   };
   
   // ************************* output operator *******************
@@ -53,14 +54,15 @@ namespace nanoblas
     SumMatExpr (TA _a, TB _b) : a(_a), b(_b) { }
     auto operator() (size_t i) const { return a(i)+b(i); }
     size_t rows() const { return a.rows(); }
-    size_t cols() const { return a.cols(); }      
+    size_t cols() const { return a.cols(); }  
+    auto shape() const { return a.shape(); }    
   };
   
   template <typename TA, typename TB>
   auto operator+ (const MatExpr<TA> & a, const MatExpr<TB> & b)
   {
     assert(a.rows()==b.rows() && a.cols()==b.cols());
-    return SumMatExpr(a.upcast(), b.upcast());
+    return SumMatExpr(a.derived(), b.derived());
   }
 
   
@@ -76,6 +78,7 @@ namespace nanoblas
     MultMatMatExpr (TA _a, TB _b) : a(_a), b(_b) { }
     size_t rows() const { return a.rows(); }
     size_t cols() const { return b.cols(); }
+    auto shape() const { return std::array<size_t,2>{a.shape()[0], b.shape()[1]}; }
     
     auto operator() (size_t i, size_t j) const { 
       using elemtypeA = std::invoke_result<TA,size_t,size_t>::type;
@@ -93,7 +96,7 @@ namespace nanoblas
   auto operator* (const MatExpr<TA> & a, const MatExpr<TB> & b)
   {
     assert(a.cols()==b.rows());
-    return MultMatMatExpr<TA,TB>(a.upcast(), b.upcast());
+    return MultMatMatExpr<TA,TB>(a.derived(), b.derived());
   }
   
 
@@ -125,7 +128,7 @@ namespace nanoblas
   auto operator* (const MatExpr<TA> & a, const VecExpr<TB> & b)
   {
     assert(a.cols()==b.size());    
-    return MultMatVecExpr<TA,TB>(a.upcast(), b.upcast());
+    return MultMatVecExpr<TA,TB>(a.derived(), b.derived());
   }
  
 

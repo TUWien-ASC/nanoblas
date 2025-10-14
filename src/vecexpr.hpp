@@ -21,9 +21,9 @@ namespace nanoblas
   class VecExpr
   {
   public:
-    auto upcast() const { return static_cast<const T&> (*this); }
-    size_t size() const { return upcast().size(); }
-    auto operator() (size_t i) const { return upcast()(i); }
+    auto derived() const { return static_cast<const T&> (*this); }
+    size_t size() const { return derived().size(); }
+    auto operator() (size_t i) const { return derived()(i); }
   };
 
   
@@ -46,7 +46,7 @@ namespace nanoblas
   auto operator+ (const VecExpr<TA> & a, const VecExpr<TB> & b)
   {
     assert(a.size()==b.size());
-    return SumVecExpr(a.upcast(), b.upcast());
+    return SumVecExpr(a.derived(), b.derived());
   }
 
 
@@ -68,7 +68,7 @@ namespace nanoblas
   auto operator- (const VecExpr<TA> & a, const VecExpr<TB> & b)
   {
     assert(a.size()==b.size());    
-    return SubVecExpr(a.upcast(), b.upcast());
+    return SubVecExpr(a.derived(), b.derived());
   }
 
 
@@ -89,7 +89,7 @@ namespace nanoblas
   template <typename TA>
   auto operator- (const VecExpr<TA> & a)
   {
-    return NegVecExpr(a.upcast());
+    return NegVecExpr(a.derived());
   }
 
 
@@ -130,7 +130,7 @@ namespace nanoblas
   template <typename TSCAL, typename T> requires (isScalar<TSCAL>())
   auto operator* (TSCAL scal, const VecExpr<T> & v)
   {
-    return ScaleVecExpr(scal, v.upcast());
+    return ScaleVecExpr(scal, v.derived());
   }
 
 
