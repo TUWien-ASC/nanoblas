@@ -134,6 +134,44 @@ namespace nanoblas
   }
 
 
+  // **************** dot product of two vectors *****************
+ 
+  template <typename TA, typename TB>
+  auto dot (const VecExpr<TA> & a, const VecExpr<TB> & b)
+  {
+    assert (a.size() == b.size());
+
+    using elemtypeA = typename std::invoke_result<TA,size_t>::type;
+    using elemtypeB = typename std::invoke_result<TB,size_t>::type;
+    using TSUM = decltype(std::declval<elemtypeA>()*std::declval<elemtypeB>());
+
+    TSUM sum = 0;
+    for (size_t i = 0; i < a.size(); i++)
+      sum += a(i)*b(i);
+    return sum;
+  }
+
+
+  
+  // **************** euclidean norm of vector *****************
+
+  double norm2(double x) { return x*x; }
+  double norm2(std::complex<double> x) { return x.real()*x.real() + x.imag()*x.imag(); }
+
+  
+  template <typename TA>
+  auto norm (const VecExpr<TA> & a)
+  {
+    using elemtype = typename std::invoke_result<TA,size_t>::type;
+
+    elemtype sum = 0;
+    for (size_t i = 0; i < a.size(); i++)
+      sum += norm2(a(i));
+    return sqrt(sum);
+  }
+
+  
+  
   // ***********************  output operator  *********************
   
 
