@@ -145,7 +145,7 @@ namespace nanoblas
                          MatrixView<double, OB> b,
                          MatrixView<double, RowMajor> c)
   {
-    MultMatMatLapack (Trans(b), Trans(a), Trans(c));
+    MultMatMatLapack (trans(b), trans(a), trans(c));
   }
 
 

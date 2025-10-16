@@ -80,7 +80,7 @@ namespace nanoblas
   
 
   
-  template <typename T>
+  template <typename T=double>
   class Vector : public VectorView<T>
   {
     typedef VectorView<T> BASE;

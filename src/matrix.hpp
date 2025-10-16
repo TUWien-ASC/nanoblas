@@ -69,11 +69,43 @@ namespace nanoblas
       else
         return m_data[j*m_dist + i];
     }
+
+    auto row(size_t i) const 
+    {
+      if constexpr (ORD == RowMajor)
+        return VectorView<T>(m_cols, m_data + i*m_dist);
+      else
+        return VectorView<T>(m_cols, m_dist, m_data + i);
+    } 
+
+    auto col(size_t j) const 
+    {
+      if constexpr (ORD == RowMajor)
+        return VectorView<T>(m_rows, m_dist, m_data + j);
+      else
+        return VectorView<T>(m_rows, m_data + j*m_dist);
+    }
+
+    auto diag() const 
+    {
+      size_t n = (m_rows < m_cols) ? m_rows : m_cols;
+      return VectorView<T>(n, m_dist+1, m_data);
+    } 
+
+    auto rows(size_t first, size_t next) const 
+    {
+      return MatrixView<T, ORD>(next - first, m_cols, m_dist, &(*this)(first, 0));
+    }
+
+    auto cols(size_t first, size_t next) const 
+    {
+      return MatrixView<T, ORD>(m_rows, next - first, m_dist, &(*this)(0, first));
+    }
   };
 
 
   template <typename T, ORDERING ORD>
-  auto Trans (MatrixView<T,ORD> mat)
+  auto trans (MatrixView<T,ORD> mat)
   {
     if constexpr (ORD==RowMajor)
       return MatrixView<T,ColMajor>(mat.cols(), mat.rows(), mat.dist(), mat.data());
