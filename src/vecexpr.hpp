@@ -162,7 +162,7 @@ namespace nanoblas
   template <typename TA>
   auto norm (const VecExpr<TA> & a)
   {
-    using elemtype = typename std::invoke_result<TA,size_t>::type;
+    using elemtype = typename std::remove_cvref<typename std::invoke_result<TA,size_t>::type>::type;
 
     elemtype sum = 0;
     for (size_t i = 0; i < a.size(); i++)

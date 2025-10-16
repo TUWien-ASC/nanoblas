@@ -174,7 +174,7 @@ namespace nanoblas
     // b overwritten with A^{-1} b
     void Solve (VectorView<double> b) const {
       char transa =  (ORD == ColMajor) ? 'N' : 'T';
-      integer n = a.Height();
+      integer n = a.rows();
       integer nrhs = 1;
       integer lda = a.dist();
       integer ldb = b.size();

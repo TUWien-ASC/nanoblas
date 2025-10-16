@@ -65,6 +65,34 @@ namespace nanoblas
     return SumMatExpr(a.derived(), b.derived());
   }
 
+
+  // ************************ ScaleMatExpr *********************  
+  
+  
+  template <typename TSCAL, typename TM>
+  class ScaleMatExpr : public MatExpr<ScaleMatExpr<TSCAL,TM>>
+  {
+    TSCAL m_scal;
+    TM m_mat;
+  public:
+    ScaleMatExpr (TSCAL scal, TM mat) : m_scal(scal), m_mat(mat) { }
+    auto operator() (size_t i, size_t j) const { return m_scal*m_mat(i,j); }
+    size_t rows() const { return m_mat.rows(); }
+    size_t cols() const { return m_mat.cols(); }  
+  };
+
+
+  /*
+  // C++17 needs the enable_if workaround instead of the 'requires' concept syntax
+  template <typename TSCAL, typename T,
+            typename std::enable_if<isScalar<TSCAL>(),int>::type = 0>
+  */
+  template <typename TSCAL, typename T> requires (isScalar<TSCAL>())
+  auto operator* (TSCAL scal, const MatExpr<T> & m)
+  {
+    return ScaleMatExpr(scal, m.derived());
+  }
+  
   
 
   // ************************* MultMatMatExpr *******************
