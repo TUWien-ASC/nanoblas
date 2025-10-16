@@ -69,6 +69,34 @@ namespace nanoblas
       return m_data[index(i,j)];
     }
 
+
+    template <typename TB>
+    MatrixView & operator+= (const MatExpr<TB> & m2)
+    {
+      for (size_t i = 0; i < m_rows; i++)
+        for (size_t j = 0; j < m_cols; j++)
+          (*this)(i,j) += m2(i,j);
+      return *this;
+    }
+    
+    template <typename TB>
+    MatrixView & operator-= (const MatExpr<TB> & m2)
+    {
+      for (size_t i = 0; i < m_rows; i++)
+        for (size_t j = 0; j < m_cols; j++)
+          (*this)(i,j) -= m2(i,j);
+      return *this;
+    }
+
+    MatrixView & operator*= (T scal)
+    {
+      for (size_t i = 0; i < rows(); i++)
+        for (size_t j = 0; j < cols(); j++)
+          (*this)(i,j) *= scal;
+      return *this;
+    }
+
+
     auto row(size_t i) const 
     {
       if constexpr (ORD == RowMajor)
