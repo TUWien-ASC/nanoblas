@@ -75,6 +75,14 @@ namespace nanoblas
           data_[dist_*i] -= v2(i);
         return *this;
       }
+
+    VectorView & operator*= (T scal)
+    {
+      for (size_t i = 0; i < size_; i++)
+        data_[dist_*i] *= scal;
+      return *this;
+    }
+    
   };
   
   

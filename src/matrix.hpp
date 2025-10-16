@@ -113,7 +113,7 @@ namespace nanoblas
       return MatrixView<T,RowMajor>(mat.cols(), mat.rows(), mat.dist(), mat.data());
   }
   
-  template <typename T, ORDERING ORD=RowMajor>
+  template <typename T=double, ORDERING ORD=RowMajor>
   class Matrix : public MatrixView<T,ORD>
   {
     typedef MatrixView<T,ORD> BASE;
