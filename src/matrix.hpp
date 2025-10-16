@@ -75,13 +75,13 @@ namespace nanoblas
       if constexpr (ORD == RowMajor)
         return VectorView<T>(m_cols, m_data + i*m_dist);
       else
-        return VectorView<T>(m_cols, m_dist, m_data + i);
+        return VectorView<T,size_t>(m_cols, m_dist, m_data + i);
     } 
 
     auto col(size_t j) const 
     {
       if constexpr (ORD == RowMajor)
-        return VectorView<T>(m_rows, m_dist, m_data + j);
+        return VectorView<T,size_t>(m_rows, m_dist, m_data + j);
       else
         return VectorView<T>(m_rows, m_data + j*m_dist);
     }
@@ -89,7 +89,7 @@ namespace nanoblas
     auto diag() const 
     {
       size_t n = (m_rows < m_cols) ? m_rows : m_cols;
-      return VectorView<T>(n, m_dist+1, m_data);
+      return VectorView<T,size_t>(n, m_dist+1, m_data);
     } 
 
     auto rows(size_t first, size_t next) const 
