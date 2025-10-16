@@ -7,7 +7,7 @@ namespace nanoblas
 {
   enum ORDERING { RowMajor, ColMajor };
 
-  template <typename T, ORDERING ORD>
+  template <typename T, ORDERING ORD=RowMajor>
   class MatrixView : public MatExpr<MatrixView<T,ORD>>
   {
   protected:
