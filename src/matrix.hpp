@@ -5,6 +5,7 @@
 
 namespace nanoblas
 {
+  
   enum ORDERING { RowMajor, ColMajor };
 
   template <typename T, ORDERING ORD=RowMajor>
@@ -35,7 +36,16 @@ namespace nanoblas
     template <typename TB, ORDERING ORD2>
     MatrixView (const MatrixView<TB,ORD2> & m2)
       : m_data(m2.data()), m_rows(m2.rows()), m_cols(m2.cols()), m_dist(m2.dist()) { }
-        
+
+
+    MatrixView & operator= (const MatrixView & m2)
+    {
+      for (size_t i = 0; i < m_rows; i++)
+        for (size_t j = 0; j < m_cols; j++)
+          (*this)(i,j) = m2(i,j);
+      return *this;
+    }
+    
     template <typename TB>
     MatrixView & operator= (const MatExpr<TB> & m2)
     {

@@ -30,6 +30,13 @@ namespace nanoblas
     VectorView (size_t size, TDIST dist, T * data)
       : data_(data), size_(size), dist_(dist) { }
     
+    VectorView & operator= (const VectorView & v2)
+    {
+      for (size_t i = 0; i < size_; i++)
+        data_[dist_*i] = v2(i);
+      return *this;
+    }
+
     template <typename TB>
     VectorView & operator= (const VecExpr<TB> & v2)
     {
@@ -117,6 +124,16 @@ namespace nanoblas
     {
       *this = v;
     }
+
+    Vector (std::initializer_list<T> list) 
+      : VectorView<T> (list.size(), new T[list.size()])
+    {
+      size_t cnt = 0;
+      for (auto val : list)
+        (*this)(cnt++) = val;
+    }
+    
+
     
     ~Vector () { delete [] data_; }
 
