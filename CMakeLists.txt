@@ -37,7 +37,6 @@ target_link_libraries(nanoblas INTERFACE ${LAPACK_LIBRARIES})
 target_include_directories(nanoblas INTERFACE ${LAPACK_INCLUDE_DIRS})
 
 
-add_subdirectory (demos)
 
 nanobind_add_module(nanoblas_impl src/bind_bla.cpp)
 target_include_directories(nanoblas_impl PRIVATE src)

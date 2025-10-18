@@ -102,7 +102,7 @@ namespace nanoblas
     using BASE::size_;
     using BASE::data_;
   public:
-    Vector (size_t size) 
+    explicit Vector (size_t size) 
       : VectorView<T> (size, new T[size]) { ; }
     
     Vector (const Vector & v)
@@ -125,6 +125,7 @@ namespace nanoblas
       *this = v;
     }
 
+    /*
     Vector (std::initializer_list<T> list) 
       : VectorView<T> (list.size(), new T[list.size()])
     {
@@ -132,8 +133,7 @@ namespace nanoblas
       for (auto val : list)
         (*this)(cnt++) = val;
     }
-    
-
+    */
     
     ~Vector () { delete [] data_; }
 

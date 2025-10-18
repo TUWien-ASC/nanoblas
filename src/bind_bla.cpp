@@ -1,11 +1,13 @@
 #include <sstream>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
 
 #include "vector.hpp"
 
 using namespace nanoblas;
 namespace py = nanobind;
+namespace nb = nanobind;
 
 
 
@@ -15,6 +17,7 @@ NB_MODULE(nanoblas_impl, m) {
     py::class_<Vector<double>> (m, "Vector")
       .def(py::init<size_t>(),
            py::arg("size"), "create vector of given size")
+
       .def("__len__", &Vector<double>::size,
            "return size of vector")
       
