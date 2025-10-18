@@ -9,84 +9,96 @@
 namespace nanoblas
 {
  
-  template <typename T, typename TDIST = std::integral_constant<size_t,1> >
+  enum ORDERING { RowMajor, ColMajor };
+
+  template <typename T, ORDERING ORD = RowMajor>
+  class MatrixView;
+
+
+  
+  template <typename T=double, typename TDIST = std::integral_constant<size_t,1> >
   class VectorView : public VecExpr<VectorView<T,TDIST>>
   {
   protected:
-    T * data_;
-    size_t size_;
-    TDIST dist_;
+    T* m_data;
+    size_t m_size;
+    TDIST m_dist;
+    
   public:
     VectorView() = default;
-    VectorView(const VectorView &) = default;
+    VectorView(const VectorView&) = default;
     
     template <typename TDIST2>
-    VectorView (const VectorView<T,TDIST2> & v2)
-      : data_(v2.data()), size_(v2.size()), dist_(v2.dist()) { }
+    VectorView (const VectorView<T,TDIST2>& v2)
+      : m_data(v2.data()), m_size(v2.size()), m_dist(v2.dist()) { }
     
-    VectorView (size_t size, T * data)
-      : data_(data), size_(size) { }
+    VectorView (size_t size, T* data)
+      : m_data(data), m_size(size) { }
     
-    VectorView (size_t size, TDIST dist, T * data)
-      : data_(data), size_(size), dist_(dist) { }
+    VectorView (size_t size, TDIST dist, T* data)
+      : m_data(data), m_size(size), m_dist(dist) { }
     
-    VectorView & operator= (const VectorView & v2)
+    VectorView & operator= (const VectorView& v2)
     {
-      for (size_t i = 0; i < size_; i++)
-        data_[dist_*i] = v2(i);
+      for (size_t i = 0; i < m_size; i++)
+        m_data[m_dist*i] = v2(i);
       return *this;
     }
 
     template <typename TB>
-    VectorView & operator= (const VecExpr<TB> & v2)
+    VectorView& operator= (const VecExpr<TB>& v2)
     {
-      for (size_t i = 0; i < size_; i++)
-        data_[dist_*i] = v2(i);
+      for (size_t i = 0; i < m_size; i++)
+        m_data[m_dist*i] = v2(i);
       return *this;
     }
 
-    VectorView & operator= (T scal)
+    VectorView& operator= (T scal)
     {
-      for (size_t i = 0; i < size_; i++)
-        data_[dist_*i] = scal;
+      for (size_t i = 0; i < m_size; i++)
+        m_data[m_dist*i] = scal;
       return *this;
     }
 
-    T * data() const { return data_; }
-    size_t size() const { return size_; }
-    auto dist() const { return dist_; }
+    T * data() const { return m_data; }
+    size_t size() const { return m_size; }
+    auto dist() const { return m_dist; }
     
-    T & operator()(size_t i) { return data_[dist_*i]; }
-    const T & operator()(size_t i) const { return data_[dist_*i]; }
+    T& operator()(size_t i) { return m_data[m_dist*i]; }
+    const T& operator()(size_t i) const { return m_data[m_dist*i]; }
     
     auto range(size_t first, size_t next) const {
-      return VectorView(next-first, dist_, data_+first*dist_);
+      return VectorView(next-first, m_dist, m_data+first*m_dist);
     }
 
     auto slice(size_t first, size_t slice) const {
-      return VectorView<T,size_t> (size_/slice, dist_*slice, data_+first*dist_);
+      return VectorView<T,size_t> (m_size/slice, m_dist*slice, m_data+first*m_dist);
     }
 
+    auto asMatrix(size_t rows, size_t cols) const {
+      return MatrixView<T,RowMajor> (rows, cols, m_data);  
+    }
+    
     template <typename TB>
-    VectorView & operator+= (const VecExpr<TB> & v2)
+    VectorView& operator+= (const VecExpr<TB>& v2)
     {
-      for (size_t i = 0; i < size_; i++)
-        data_[dist_*i] += v2(i);
+      for (size_t i = 0; i < m_size; i++)
+        m_data[m_dist*i] += v2(i);
       return *this;
     }
 
     template <typename TB>
-    VectorView & operator-= (const VecExpr<TB> & v2)
+    VectorView& operator-= (const VecExpr<TB>& v2)
       {
-        for (size_t i = 0; i < size_; i++)
-          data_[dist_*i] -= v2(i);
+        for (size_t i = 0; i < m_size; i++)
+          m_data[m_dist*i] -= v2(i);
         return *this;
       }
 
-    VectorView & operator*= (T scal)
+    VectorView& operator*= (T scal)
     {
-      for (size_t i = 0; i < size_; i++)
-        data_[dist_*i] *= scal;
+      for (size_t i = 0; i < m_size; i++)
+        m_data[m_dist*i] *= scal;
       return *this;
     }
     
@@ -99,13 +111,13 @@ namespace nanoblas
   class Vector : public VectorView<T>
   {
     typedef VectorView<T> BASE;
-    using BASE::size_;
-    using BASE::data_;
+    using BASE::m_size;
+    using BASE::m_data;
   public:
     explicit Vector (size_t size) 
       : VectorView<T> (size, new T[size]) { ; }
     
-    Vector (const Vector & v)
+    Vector (const Vector& v)
       : Vector(v.size())
     {
       *this = v;
@@ -114,12 +126,12 @@ namespace nanoblas
     Vector (Vector && v)
       : VectorView<T> (0, nullptr)
     {
-      std::swap(size_, v.size_);
-      std::swap(data_, v.data_);
+      std::swap(m_size, v.m_size);
+      std::swap(m_data, v.m_data);
     }
 
     template <typename TB>
-    Vector (const VecExpr<TB> & v)
+    Vector (const VecExpr<TB>& v)
       : Vector(v.size())
     {
       *this = v;
@@ -134,27 +146,27 @@ namespace nanoblas
         (*this)(cnt++) = val;
     }
     
-    ~Vector () { delete [] data_; }
+    ~Vector () { delete [] m_data; }
 
     using BASE::operator=;
-    Vector & operator=(const Vector & v2)
+    Vector& operator=(const Vector& v2)
     {
-      for (size_t i = 0; i < size_; i++)
-        data_[i] = v2(i);
+      for (size_t i = 0; i < m_size; i++)
+        m_data[i] = v2(i);
       return *this;
     }
 
-    Vector & operator= (Vector && v2)
+    Vector& operator= (Vector && v2)
     {
-      std::swap(size_, v2.size_);
-      std::swap(data_, v2.data_);
+      std::swap(m_size, v2.m_size);
+      std::swap(m_data, v2.m_data);
       return *this;
     }
   };
 
 
   template <typename ...Args>
-  std::ostream & operator<< (std::ostream & ost, const VectorView<Args...> & v)
+  std::ostream& operator<< (std::ostream& ost, const VectorView<Args...>& v)
   {
     if (v.size() > 0)
       ost << v(0);
@@ -162,6 +174,58 @@ namespace nanoblas
       ost << ", " << v(i);
     return ost;
   }
+
+
+  template <size_t S, typename T=double>
+  class Vec : public VecExpr<Vec<S,T>>
+  {
+    std::array<T, S> m_data;
+  public:
+    Vec() = default;
+    Vec (const Vec& v) = default;
+    
+    template <typename TB>
+    Vec (const VecExpr<TB>& v)
+    {
+      for (size_t i = 0; i < S; i++)
+        m_data[i] = v(i);
+    }
+
+    Vec (T val)
+    {
+      for (size_t i = 0; i < S; i++)
+        m_data[i] = val;
+    }
+
+    Vec (std::initializer_list<T> list)
+    {
+      size_t cnt = 0;
+      for (auto val : list)
+        (*this)(cnt++) = val;
+    }
+    
+    Vec& operator= (const Vec& v2)
+    {
+      for (size_t i = 0; i < S; i++)
+        m_data[i] = v2.m_data[i];
+      return *this;
+    }
+    
+    template <typename TB>
+    Vec& operator= (const VecExpr<TB>& v2)
+    {
+      for (size_t i = 0; i < S; i++)
+        m_data[i] = v2(i);
+      return *this;
+    }
+    
+    size_t size() const { return S; }
+    std::array<T,S>& data() { return m_data; }
+    const std::array<T,S>& data() const { return m_data; }
+    
+    T& operator() (size_t i) { return m_data[i]; }
+    const T& operator() (size_t i) const { return m_data[i]; }
+ };
   
 }
 

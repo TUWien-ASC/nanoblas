@@ -8,6 +8,7 @@
 namespace nanoblas
 {
 
+  
 
   /*
     Expression templates for vector expressions
@@ -31,7 +32,7 @@ namespace nanoblas
   // ************************ SumVecExpr *********************
  
   template <typename TA, typename TB>
-  class SumVecExpr : public VecExpr<SumVecExpr<TA,TB>>
+  struct SumVecExpr : public VecExpr<SumVecExpr<TA,TB>>
   {
     TA a;
     TB b;
@@ -43,7 +44,7 @@ namespace nanoblas
   };
   
   template <typename TA, typename TB>
-  auto operator+ (const VecExpr<TA> & a, const VecExpr<TB> & b)
+  auto operator+ (const VecExpr<TA>& a, const VecExpr<TB>& b)
   {
     assert(a.size()==b.size());
     return SumVecExpr(a.derived(), b.derived());
@@ -65,7 +66,7 @@ namespace nanoblas
   };
   
   template <typename TA, typename TB>
-  auto operator- (const VecExpr<TA> & a, const VecExpr<TB> & b)
+  auto operator- (const VecExpr<TA>& a, const VecExpr<TB>& b)
   {
     assert(a.size()==b.size());    
     return SubVecExpr(a.derived(), b.derived());
@@ -87,7 +88,7 @@ namespace nanoblas
   };
   
   template <typename TA>
-  auto operator- (const VecExpr<TA> & a)
+  auto operator- (const VecExpr<TA>& a)
   {
     return NegVecExpr(a.derived());
   }
@@ -101,10 +102,11 @@ namespace nanoblas
   struct is_scalar_type { static constexpr bool value = std::integral<T>||std::floating_point<T>; };
   
   template <typename T>
-  constexpr bool isScalar () { return is_scalar_type<T>::value; }
+  struct is_scalar_type<std::complex<T>> { static constexpr bool value = isScalar<T>(); };
+
 
   template <typename T>
-  struct is_scalar_type<std::complex<T>> { static constexpr bool value = isScalar<T>(); };
+  constexpr bool isScalar() { return is_scalar_type<T>::value; }
 
 
   
@@ -119,16 +121,14 @@ namespace nanoblas
     size_t size() const { return vec.size(); }      
   };
 
-
   /*
   // C++17 needs the enable_if workaround instead of the 'requires' concept syntax
   template <typename TSCAL, typename T,
             typename std::enable_if<isScalar<TSCAL>(),int>::type = 0>
   */
-
   
   template <typename TSCAL, typename T> requires (isScalar<TSCAL>())
-  auto operator* (TSCAL scal, const VecExpr<T> & v)
+  auto operator* (TSCAL scal, const VecExpr<T>& v)
   {
     return ScaleVecExpr(scal, v.derived());
   }
@@ -137,7 +137,7 @@ namespace nanoblas
   // **************** dot product of two vectors *****************
  
   template <typename TA, typename TB>
-  auto dot (const VecExpr<TA> & a, const VecExpr<TB> & b)
+  auto dot (const VecExpr<TA>& a, const VecExpr<TB>& b)
   {
     assert (a.size() == b.size());
 
@@ -155,12 +155,12 @@ namespace nanoblas
   
   // **************** euclidean norm of vector *****************
 
-  double norm2(double x) { return x*x; }
-  double norm2(std::complex<double> x) { return x.real()*x.real() + x.imag()*x.imag(); }
+  double norm2 (double x) { return x*x; }
+  double norm2 (std::complex<double> x) { return x.real()*x.real() + x.imag()*x.imag(); }
 
   
   template <typename TA>
-  auto norm (const VecExpr<TA> & a)
+  auto norm (const VecExpr<TA>& a)
   {
     using elemtype = typename std::remove_cvref<typename std::invoke_result<TA,size_t>::type>::type;
 
@@ -176,7 +176,7 @@ namespace nanoblas
   
 
   template <typename T>
-  std::ostream & operator<< (std::ostream & ost, const VecExpr<T> & v)
+  std::ostream & operator<< (std::ostream& ost, const VecExpr<T>& v)
   {
     if (v.size() > 0)
       ost << v(0);
