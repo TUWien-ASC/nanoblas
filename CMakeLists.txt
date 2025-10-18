@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Dependency: nanobind via Python
+# Dependency: pybind11 via Python
 find_package(Python 3.8 COMPONENTS Interpreter Development REQUIRED)
 execute_process(
-    COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
-    OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE NANOBIND_DIR
+    COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmakedir
+    OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE PYBIND11_DIR
 )
-list(APPEND CMAKE_PREFIX_PATH "${NANOBIND_DIR}")
-find_package(nanobind CONFIG REQUIRED)
+list(APPEND CMAKE_PREFIX_PATH "${PYBIND11_DIR}")
+find_package(pybind11 CONFIG REQUIRED)
 
 # BLAS/LAPACK handling (Windows-specific OpenBLAS handling)
 if(WIN32)
@@ -38,7 +38,7 @@ target_include_directories(nanoblas INTERFACE ${LAPACK_INCLUDE_DIRS})
 
 
 
-nanobind_add_module(nanoblas_impl src/bind_bla.cpp)
+pybind11_add_module(nanoblas_impl src/bind_bla.cpp)
 target_include_directories(nanoblas_impl PRIVATE src)
 target_link_libraries(nanoblas_impl PRIVATE LAPACK::LAPACK)
 target_compile_features(nanoblas_impl PRIVATE cxx_std_20)

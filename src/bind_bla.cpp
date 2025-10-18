@@ -1,17 +1,14 @@
 #include <sstream>
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
-#include <nanobind/stl/vector.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "vector.hpp"
 
 using namespace nanoblas;
-namespace py = nanobind;
-namespace nb = nanobind;
+namespace py = pybind11;
 
 
-
-NB_MODULE(nanoblas_impl, m) {
+PYBIND11_MODULE(nanoblas_impl, m) {
     m.doc() = "Basic linear algebra module"; // optional module docstring
     
     py::class_<Vector<double>> (m, "Vector")
@@ -30,7 +27,9 @@ NB_MODULE(nanoblas_impl, m) {
       
       .def("__setitem__", [](Vector<double> & self, py::slice inds, double val)
       {
-        auto [start, stop, step, slice_length] = inds.compute(self.size());
+        // auto [start, stop, step, slice_length] = inds.compute(self.size()); // can do in nanobind
+        size_t start, stop, step, n;
+        inds.compute(self.size(), &start, &stop, &step, &n);
         self.range(start, stop).slice(0,step) = val;
       })
       
