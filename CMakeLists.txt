@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
+
+# Set default CMAKE_BUILD_TYPE to RelWithDebInfo if not specified
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build." FORCE)
+endif()
+
 project(nanoblas LANGUAGES CXX)
 
 option(NANOBLAS_BUILD_DEMOS "Build demonstration targets" ON)
