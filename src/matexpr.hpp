@@ -108,7 +108,19 @@ namespace nanoblas
     size_t cols() const { return b.cols(); }
     auto shape() const { return std::array<size_t,2>{a.shape()[0], b.shape()[1]}; }
     
-    auto operator() (size_t i, size_t j) const { return dot(a.row(i), b.col(j)); }
+    // auto operator() (size_t i, size_t j) const { return dot(a.row(i), b.col(j)); }
+    auto operator() (size_t i, size_t j) const { 
+      using elemtypeA = std::invoke_result<TA,size_t,size_t>::type;
+      using elemtypeB = std::invoke_result<TB,size_t,size_t>::type;
+      using TSCAL = decltype(std::declval<elemtypeA>()*std::declval<elemtypeB>());
+      
+      TSCAL sum = 0;
+      for (size_t k = 0; k < a.cols(); k++)
+        sum += a(i,k) * b(k,j); 
+      return sum;
+    }
+
+    
   };
   
   template <typename TA, typename TB>
@@ -131,7 +143,18 @@ namespace nanoblas
     MultMatVecExpr (TA _a, TB _b) : a(_a), b(_b) { }
     size_t size() const { return a.rows(); }
     
-    auto operator() (size_t i) const { return dot(a.row(i), b); }
+    // auto operator() (size_t i) const { return dot(a.row(i), b); }
+    auto operator() (size_t i) const { 
+      using elemtypeA = std::invoke_result<TA,size_t,size_t>::type;
+      using elemtypeB = std::invoke_result<TB,size_t>::type;
+      using TSCAL = decltype(std::declval<elemtypeA>()*std::declval<elemtypeB>());
+      
+      TSCAL sum = 0;
+      for (size_t k = 0; k < a.cols(); k++)
+        sum += a(i,k) * b(k); 
+      return sum;
+    }
+    
   };
 
   template <typename TA, typename TB>
