@@ -2,6 +2,7 @@
 #define FILE_VECTOR
 
 #include <iostream>
+#include <vector>
 
 #include "vecexpr.hpp"
 
@@ -38,7 +39,7 @@ namespace nanoblas
     VectorView (size_t size, TDIST dist, T* data)
       : m_data(data), m_size(size), m_dist(dist) { }
     
-    VectorView & operator= (const VectorView& v2)
+    VectorView operator= (const VectorView& v2)
     {
       for (size_t i = 0; i < m_size; i++)
         m_data[m_dist*i] = v2(i);
@@ -46,18 +47,33 @@ namespace nanoblas
     }
 
     template <typename TB>
-    VectorView& operator= (const VecExpr<TB>& v2)
+    VectorView operator= (const VecExpr<TB>& v2)
     {
       for (size_t i = 0; i < m_size; i++)
         m_data[m_dist*i] = v2(i);
       return *this;
     }
 
-    VectorView& operator= (T scal)
+    VectorView operator= (T scal)
     {
       for (size_t i = 0; i < m_size; i++)
         m_data[m_dist*i] = scal;
       return *this;
+    }
+
+    VectorView operator= (const std::vector<T>& v2)
+    {
+      for (size_t i = 0; i < m_size; i++)
+        m_data[m_dist*i] = v2[i];
+      return *this;
+    }
+
+    operator std::vector<T>() const
+    {
+      std::vector<T> v2(m_size);
+      for (size_t i = 0; i < m_size; i++)
+        v2[i] = m_data[m_dist*i];
+      return v2;
     }
 
     T * data() const { return m_data; }
@@ -66,6 +82,9 @@ namespace nanoblas
     
     T& operator()(size_t i) { return m_data[m_dist*i]; }
     const T& operator()(size_t i) const { return m_data[m_dist*i]; }
+    
+    T& operator[](size_t i) { return m_data[m_dist*i]; }
+    const T& operator[](size_t i) const { return m_data[m_dist*i]; }
     
     auto range(size_t first, size_t next) const {
       return VectorView(next-first, m_dist, m_data+first*m_dist);

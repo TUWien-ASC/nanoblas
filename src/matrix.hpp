@@ -168,6 +168,22 @@ namespace nanoblas
       *this = m2;
     }
           
+    Matrix (std::initializer_list<std::initializer_list<T>> list)
+      : BASE(list.size(), list.begin()->size(), new T[list.size()*list.begin()->size()])
+    {
+      size_t i = 0;
+      for (auto row : list)
+        {
+          size_t j = 0;
+          for (auto val : row)
+            {
+              (*this)(i,j) = val;
+              j++;
+            }
+          i++;
+        }
+    } 
+
     ~Matrix() { delete[] m_data; }
 
     using BASE::operator=;
