@@ -2,18 +2,17 @@
 #define INVERSE_HPP
 
 #include <vector>
+#include <utility>
 
 #include <matrix.hpp>
 
 namespace nanoblas {
 
-template <typename T>  
-void calcInverse(const Matrix<T>& mat) 
-{
-    // Check if the matrix is square
-    if (mat.rows() != mat.cols()) {
-        throw std::invalid_argument("Matrix must be square to compute its inverse.");
-    }
+  template <typename T>  
+  void calcInverse(MatrixView<T> mat) 
+  {
+    if (mat.rows() != mat.cols())
+      throw std::invalid_argument("Matrix must be square to compute its inverse.");
 
     size_t n = mat.rows();
 
@@ -37,9 +36,8 @@ void calcInverse(const Matrix<T>& mat)
         for (size_t i = j+1; i < n; i++)
           rest += abs(mat(r, i));
 	if (maxval < 1e-20*rest)
-	  {
-	    throw std::runtime_error("Inverse matrix: Matrix singular");
-	  }
+          throw std::runtime_error("Inverse matrix: Matrix singular");
+
 
 	// exchange rows
 	if (r > j)
@@ -53,29 +51,24 @@ void calcInverse(const Matrix<T>& mat)
 	// transformation
 	
 	T hr = 1.0 / mat(j,j);
-
 	for (size_t i = 0; i < n; i++)
-            mat(j,i) = hr * mat(j,i);
+          mat(j,i) *= hr;
 	mat(j,j) = hr;
 
 	for (size_t k = 0; k < n; k++)
 	  if (k != j)
 	    {
-	      T help = mat(n*k+j);
+	      T help = mat(k,j);
 	      T h = help * hr;   
 
 	      for (size_t i = 0; i < n; i++)
-		{
-		  T h = help * mat(n*j+i); 
-		  mat(n*k+i) -= h;
-		}
+                mat(k,i) -= help * mat(j,i); 
 
 	      mat(k,j) = -h;
 	    }
       }
 
     // row exchange
-  
     std::vector<T> hv(n);
     for (size_t i = 0; i < n; i++)
       {
@@ -83,7 +76,7 @@ void calcInverse(const Matrix<T>& mat)
 	for (size_t k = 0; k < n; k++) mat(k, i) = hv[k];
       }
 
-    }
+  }
 
 
 }
