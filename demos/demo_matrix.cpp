@@ -36,7 +36,7 @@ int main()
 
   std::cout << "a = " << a << std::endl;
 
-  std::cout << "Inv(a) = " << LapackLU(a).Inverse() << std::endl;
+  std::cout << "Inv(a) = " << LapackLU(a).inverse() << std::endl;
 
   Matrix<double> inv = a;
   calcInverse (inv);

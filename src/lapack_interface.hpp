@@ -172,7 +172,7 @@ namespace nanoblas
     }
     
     // b overwritten with A^{-1} b
-    void Solve (VectorView<double> b) const {
+    void solve (VectorView<double> b) const {
       char transa =  (ORD == ColMajor) ? 'N' : 'T';
       integer n = a.rows();
       integer nrhs = 1;
@@ -187,7 +187,7 @@ namespace nanoblas
       dgetrs_(&transa, &n, &nrhs, a.data(), &lda, (integer*)ipiv.data(), b.data(), &ldb, &info);
     }
   
-    Matrix<double,ORD> Inverse() && {
+    Matrix<double,ORD> inverse() && {
       double hwork;
       integer lwork = -1;
       integer n = a.rows();      
