@@ -33,4 +33,9 @@ int main()
   MultMatVecLapack<double> (1.0, A, x, 0.0, y);
   cout << "A*x = " << y << endl;
   cout << " =?=" << A * x << endl;
+
+
+    
+
+
 }

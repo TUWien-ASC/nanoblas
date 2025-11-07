@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <matrix.hpp>
+#include <inverse.hpp>
 #include <lapack_interface.hpp>
 
 using namespace nanoblas;
@@ -36,5 +37,9 @@ int main()
   std::cout << "a = " << a << std::endl;
 
   std::cout << "Inv(a) = " << LapackLU(a).Inverse() << std::endl;
+
+  Matrix<double> inv = a;
+  calcInverse (inv);
+  std::cout << "calcInverse(a) = " << inv << std::endl; 
   
 }
