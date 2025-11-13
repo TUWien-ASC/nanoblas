@@ -102,11 +102,13 @@ namespace nanoblas
   struct is_scalar_type { static constexpr bool value = std::integral<T>||std::floating_point<T>; };
   
   template <typename T>
-  struct is_scalar_type<std::complex<T>> { static constexpr bool value = isScalar<T>(); };
+  constexpr bool isScalar() { return is_scalar_type<T>::value; }
 
 
   template <typename T>
-  constexpr bool isScalar() { return is_scalar_type<T>::value; }
+  struct is_scalar_type<std::complex<T>> { static constexpr bool value = isScalar<T>(); };
+
+
 
 
   
