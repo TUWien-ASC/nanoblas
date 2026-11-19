@@ -166,6 +166,7 @@ namespace nanoblas
     using BASE::m_cols;
     using BASE::m_data;
     using BASE::m_rows;
+    using BASE::m_stride;
 
   public:
     Matrix (size_t rows, size_t cols)
@@ -176,7 +177,22 @@ namespace nanoblas
     {
       *this = m2;
     }
-          
+
+    // move: take over the memory of m2, no copying
+    Matrix (Matrix && m2)
+      : BASE(0, 0, nullptr)
+    {
+      swapWith(m2);
+    }
+
+    // evaluates an expression into a new matrix, e.g. Matrix<> C = A*B;
+    template <typename TB>
+    Matrix (const MatExpr<TB>& m2)
+      : BASE(m2.rows(), m2.cols(), new T[m2.rows()*m2.cols()])
+    {
+      BASE::operator=(m2);
+    }
+
     Matrix (std::initializer_list<std::initializer_list<T>> list)
       : BASE(list.size(), list.begin()->size(), new T[list.size()*list.begin()->size()])
     {
@@ -205,7 +221,22 @@ namespace nanoblas
         }
       return *this;
     }
-                    
+
+    // m2 gets our old memory, and releases it in its destructor
+    Matrix& operator= (Matrix && m2)
+    {
+      swapWith(m2);
+      return *this;
+    }
+
+  private:
+    void swapWith (Matrix & m2)
+    {
+      std::swap(m_data, m2.m_data);
+      std::swap(m_rows, m2.m_rows);
+      std::swap(m_cols, m2.m_cols);
+      std::swap(m_stride, m2.m_stride);
+    }
   };
 
 }
