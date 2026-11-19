@@ -11,6 +11,13 @@
 
 #include <complex>
 
+/*
+  BLAS and LAPACK are Fortran libraries: matrices are column-major, all
+  arguments are passed by pointer, and function names end with '_'.
+  A row-major matrix is passed as its transposed column-major matrix.
+  The typedefs below are the C types used in the CLAPACK header.
+*/
+
 typedef int integer;
 typedef integer logical;
 typedef float real;
@@ -76,8 +83,7 @@ namespace nanoblas
     integer dx = std::max<size_t>(x.stride(), 1);
     integer dy = std::max<size_t>(y.stride(), 1);
 
-    int err =
-      dgemv_(&transa,
+    dgemv_(&transa,
              &n, &m,
              &alpha,
              a.data(), &lda,
@@ -147,12 +153,14 @@ namespace nanoblas
                          MatrixView<double, OB> b,
                          MatrixView<double, RowMajor> c)
   {
-    MultMatMatLapack (trans(b), trans(a), trans(c));
+    MultMatMatLapack (transpose(b), transpose(a), transpose(c));
   }
 
 
   
 
+  // LU factorization with partial pivoting (dgetrf), computed once in the
+  // constructor; then solve with many right-hand sides, or compute the inverse
   template <ORDERING ORD>
   class LapackLU {
     Matrix <double, ORD> a;
@@ -207,10 +215,6 @@ namespace nanoblas
       dgetri_(&n, &a(0,0), &lda, ipiv.data(), &work[0], &lwork, &info);
       return std::move(a);      
     }
-
-    // Matrix<double,ORD> LFactor() const { ... }
-    // Matrix<double,ORD> UFactor() const { ... }
-    // Matrix<double,ORD> PFactor() const { ... }
   };
   
 }

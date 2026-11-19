@@ -16,7 +16,8 @@ namespace nanoblas
     
     VecExpr is the basis for all vector expressions
     Uses compile-time polymorphism, known as
-    Curiously recurring template pattern (CRTP)
+    Curiously recurring template pattern (CRTP):
+    T is the derived class, derived() casts to it.
   */
 
   template <typename T>
@@ -31,7 +32,10 @@ namespace nanoblas
   
 
   // ************************ SumVecExpr *********************
- 
+
+  // An expression stores its operands by value (views and expressions are
+  // cheap to copy), and computes an entry only when it is requested.
+  // Thus x = a+b+c runs one loop, without temporary vectors.
   template <typename TA, typename TB>
   struct SumVecExpr : public VecExpr<SumVecExpr<TA,TB>>
   {
@@ -97,8 +101,8 @@ namespace nanoblas
 
 
   // ************************ ScaleVecExpr *********************
-  
 
+  // restricts scal*v to scalars, otherwise the template would also match vector*vector
   template <typename T>
   struct is_scalar_type { static constexpr bool value = std::integral<T>||std::floating_point<T>; };
   
@@ -124,12 +128,6 @@ namespace nanoblas
     size_t size() const { return vec.size(); }      
   };
 
-  /*
-  // C++17 needs the enable_if workaround instead of the 'requires' concept syntax
-  template <typename TSCAL, typename T,
-            typename std::enable_if<isScalar<TSCAL>(),int>::type = 0>
-  */
-  
   template <typename TSCAL, typename T> requires (isScalar<TSCAL>())
   auto operator* (TSCAL scal, const VecExpr<T>& v)
   {
@@ -144,6 +142,7 @@ namespace nanoblas
   {
     assert (a.size() == b.size());
 
+    // type of a product of entries, e.g. complex for double*complex
     using elemtypeA = typename std::invoke_result<TA,size_t>::type;
     using elemtypeB = typename std::invoke_result<TB,size_t>::type;
     using TSUM = decltype(std::declval<elemtypeA>()*std::declval<elemtypeB>());
@@ -158,6 +157,8 @@ namespace nanoblas
   
   // **************** euclidean norm of vector *****************
 
+  // non-template functions in a header must be inline,
+  // otherwise linking several .cpp files fails
   inline double norm2 (double x) { return x*x; }
   inline double norm2 (std::complex<double> x) { return x.real()*x.real() + x.imag()*x.imag(); }
 

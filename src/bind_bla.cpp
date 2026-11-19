@@ -8,6 +8,8 @@ using namespace nanoblas;
 namespace py = pybind11;
 
 
+// Python module nanoblas_impl, imported by nanoblas/__init__.py.
+// Each .def maps a Python method (e.g. __getitem__ for v[i]) to a C++ lambda.
 PYBIND11_MODULE(nanoblas_impl, m) {
     m.doc() = "Basic linear algebra module"; // optional module docstring
     
@@ -27,7 +29,6 @@ PYBIND11_MODULE(nanoblas_impl, m) {
       
       .def("__setitem__", [](Vector<double> & self, py::slice inds, double val)
       {
-        // auto [start, stop, step, slice_length] = inds.compute(self.size()); // can do in nanobind
         size_t start, stop, step, n;
         inds.compute(self.size(), &start, &stop, &step, &n);
         self.range(start, stop).slice(0,step) = val;
@@ -51,22 +52,5 @@ PYBIND11_MODULE(nanoblas_impl, m) {
         return str.str();
       })
 
-      /*
-     .def(py::pickle(
-        [](Vector<double> & self) { // __getstate__
-          // return a tuple that fully encodes the state of the object 
-          return py::make_tuple(self.size(),
-                                py::bytes((char*)(void*)&self(0), self.size()*sizeof(double)));
-        },
-        [](py::tuple t) { // __setstate__
-          if (t.size() != 2)
-            throw std::runtime_error("should be a 2-tuple!");
-
-          Vector<double> v(t[0].cast<size_t>());
-          py::bytes mem = t[1].cast<py::bytes>();
-          std::memcpy(&v(0), PYBIND11_BYTES_AS_STRING(mem.ptr()), v.size()*sizeof(double));
-          return v;
-        }))
-      */
     ;
 }

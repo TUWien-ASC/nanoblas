@@ -7,8 +7,12 @@
 namespace nanoblas
 {
   
-  // enum ORDERING { RowMajor, ColMajor };
-
+  /*
+    A view on a dense matrix, stored row-major or column-major.
+    stride is the distance in memory between consecutive rows (RowMajor)
+    or columns (ColMajor). A stride larger than the width allows views
+    on sub-matrices.
+  */
   template <typename T, ORDERING ORD>
   class MatrixView : public MatExpr<MatrixView<T,ORD>>
   {
@@ -108,7 +112,9 @@ namespace nanoblas
     }
 
 
-    auto row(size_t i) const 
+    // row, column and diagonal are vector views, no copies;
+    // contiguous ones get the compile-time stride 1
+    auto row(size_t i) const
     {
       if constexpr (ORD == RowMajor)
         return VectorView<T>(m_cols, m_data + i*m_stride);
@@ -129,7 +135,8 @@ namespace nanoblas
       return VectorView<T,size_t>(std::min(m_rows, m_cols), m_stride+1, m_data);
     } 
 
-    auto rowRange(size_t first, size_t next) const 
+    // rows [first, next) as a matrix view
+    auto rowRange(size_t first, size_t next) const
     {
       return MatrixView<T, ORD>(next - first, m_cols, m_stride, m_data+index(first,0));
     }
@@ -141,15 +148,17 @@ namespace nanoblas
   };
 
 
+  // no copy: the same memory, read in the other ordering
   template <typename T, ORDERING ORD>
-  auto trans (MatrixView<T,ORD> mat)
+  auto transpose (MatrixView<T,ORD> mat)
   {
     if constexpr (ORD==RowMajor)
       return MatrixView<T,ColMajor>(mat.cols(), mat.rows(), mat.stride(), mat.data());
     else
       return MatrixView<T,RowMajor>(mat.cols(), mat.rows(), mat.stride(), mat.data());
   }
-  
+
+  // owns its memory, all functionality comes from MatrixView
   template <typename T=double, ORDERING ORD=RowMajor>
   class Matrix : public MatrixView<T,ORD>
   {

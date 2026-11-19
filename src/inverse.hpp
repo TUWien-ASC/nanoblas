@@ -10,8 +10,10 @@
 
 namespace nanoblas {
 
-  template <typename T>  
-  void calcInverse(MatrixView<T> mat) 
+  // Replaces a row-major matrix by its inverse: Gauss-Jordan elimination with
+  // column pivoting, O(n^3) operations. For larger matrices use LapackLU.
+  template <typename T>
+  void calcInverse(MatrixView<T> mat)
   {
     if (mat.rows() != mat.cols())
       throw std::invalid_argument("Matrix must be square to compute its inverse.");

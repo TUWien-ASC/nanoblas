@@ -82,11 +82,6 @@ namespace nanoblas
   };
 
 
-  /*
-  // C++17 needs the enable_if workaround instead of the 'requires' concept syntax
-  template <typename TSCAL, typename T,
-            typename std::enable_if<isScalar<TSCAL>(),int>::type = 0>
-  */
   template <typename TSCAL, typename T> requires (isScalar<TSCAL>())
   auto operator* (TSCAL scal, const MatExpr<T>& m)
   {
@@ -96,7 +91,9 @@ namespace nanoblas
   
 
   // ************************* MultMatMatExpr *******************
-  
+
+  // Every entry costs a dot product, and is computed again on each access.
+  // Assign the product to a Matrix before using it in further expressions.
   template <typename TA, typename TB>
   class MultMatMatExpr : public MatExpr<MultMatMatExpr<TA,TB>>
   {
@@ -108,7 +105,6 @@ namespace nanoblas
     size_t cols() const { return b.cols(); }
     auto shape() const { return std::array<size_t,2>{a.shape()[0], b.shape()[1]}; }
     
-    // auto operator() (size_t i, size_t j) const { return dot(a.row(i), b.col(j)); }
     auto operator() (size_t i, size_t j) const { 
       using elemtypeA = std::invoke_result<TA,size_t,size_t>::type;
       using elemtypeB = std::invoke_result<TB,size_t,size_t>::type;
@@ -143,7 +139,6 @@ namespace nanoblas
     MultMatVecExpr (TA _a, TB _b) : a(_a), b(_b) { }
     size_t size() const { return a.rows(); }
     
-    // auto operator() (size_t i) const { return dot(a.row(i), b); }
     auto operator() (size_t i) const { 
       using elemtypeA = std::invoke_result<TA,size_t,size_t>::type;
       using elemtypeB = std::invoke_result<TB,size_t>::type;

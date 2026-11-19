@@ -16,7 +16,13 @@ namespace nanoblas
   class MatrixView;
 
 
-  
+
+  /*
+    A view on vector entries owned by someone else: pointer, size and stride.
+    Copying a view copies the pointer, assigning to a view copies the values.
+    The default stride is the compile-time constant 1, then the
+    compiler removes the multiplication in the index calculation.
+  */
   template <typename T=double, typename TSTRIDE = std::integral_constant<size_t,1> >
   class VectorView : public VecExpr<VectorView<T,TSTRIDE>>
   {
@@ -86,14 +92,17 @@ namespace nanoblas
     T& operator[](size_t i) { return m_data[m_stride*i]; }
     const T& operator[](size_t i) const { return m_data[m_stride*i]; }
     
+    // entries [first, next)
     auto range(size_t first, size_t next) const {
       return VectorView(next-first, m_stride, m_data+first*m_stride);
     }
 
+    // every slice-th entry, starting at first
     auto slice(size_t first, size_t slice) const {
       return VectorView<T,size_t> ((m_size-first+slice-1)/slice, m_stride*slice, m_data+first*m_stride);
     }
 
+    // the same memory as row-major matrix, requires stride 1
     auto asMatrix(size_t rows, size_t cols) const {
       return MatrixView<T,RowMajor> (rows, cols, m_data);  
     }
@@ -125,7 +134,8 @@ namespace nanoblas
   
   
 
-  
+
+  // owns its memory, all functionality comes from VectorView
   template <typename T=double>
   class Vector : public VectorView<T>
   {
@@ -142,6 +152,7 @@ namespace nanoblas
       *this = v;
     }
 
+    // move: take over the memory of v, no copying
     Vector (Vector && v)
       : VectorView<T> (0, nullptr)
     {
@@ -184,17 +195,8 @@ namespace nanoblas
   };
 
 
-  template <typename ...Args>
-  std::ostream& operator<< (std::ostream& ost, const VectorView<Args...>& v)
-  {
-    if (v.size() > 0)
-      ost << v(0);
-    for (size_t i = 1; i < v.size(); i++)
-      ost << ", " << v(i);
-    return ost;
-  }
-
-
+  // small vector of compile-time size S, stored inline without heap allocation,
+  // e.g. a point in 3D
   template <size_t S, typename T=double>
   class Vec : public VecExpr<Vec<S,T>>
   {
