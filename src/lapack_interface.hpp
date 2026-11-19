@@ -47,8 +47,8 @@ namespace nanoblas
   void AddVectorLapack (double alpha, VectorView<double,SX> x, VectorView<double,SY> y)
   {
     integer n = x.size();
-    integer incx = x.dist();
-    integer incy = y.dist();
+    integer incx = x.stride();
+    integer incy = y.stride();
     daxpy_ (&n, &alpha, &x(0),  &incx, &y(0), &incy);
   }
   
@@ -71,10 +71,10 @@ namespace nanoblas
     // dimensions of the column-major matrix seen by BLAS
     integer n = (ORD == ColMajor) ? a.rows() : a.cols();
     integer m = (ORD == ColMajor) ? a.cols() : a.rows();
-    integer lda = std::max<size_t>(a.dist(), 1);
+    integer lda = std::max<size_t>(a.stride(), 1);
 
-    integer dx = std::max<size_t>(x.dist(), 1);
-    integer dy = std::max<size_t>(y.dist(), 1);
+    integer dx = std::max<size_t>(x.stride(), 1);
+    integer dy = std::max<size_t>(y.stride(), 1);
 
     int err =
       dgemv_(&transa,
@@ -130,9 +130,9 @@ namespace nanoblas
   
     double alpha = 1.0;
     double beta = 0;
-    integer lda = std::max<size_t>(a.dist(), 1);
-    integer ldb = std::max<size_t>(b.dist(), 1);
-    integer ldc = std::max<size_t>(c.dist(), 1);
+    integer lda = std::max<size_t>(a.stride(), 1);
+    integer ldb = std::max<size_t>(b.stride(), 1);
+    integer ldc = std::max<size_t>(c.stride(), 1);
 
     int err =
       gemm (&transa_, &transb_, &n, &m, &k, &alpha, 
@@ -164,7 +164,7 @@ namespace nanoblas
       integer m = a.rows();
       if (m == 0) return;
       integer n = a.cols();
-      integer lda = a.dist();
+      integer lda = a.stride();
       integer info;
     
       // int dgetrf_(integer *m, integer *n, doublereal *a, 
@@ -178,7 +178,7 @@ namespace nanoblas
       char transa =  (ORD == ColMajor) ? 'N' : 'T';
       integer n = a.rows();
       integer nrhs = 1;
-      integer lda = a.dist();
+      integer lda = a.stride();
       integer ldb = b.size();
       integer info;
 
@@ -193,7 +193,7 @@ namespace nanoblas
       double hwork;
       integer lwork = -1;
       integer n = a.rows();      
-      integer lda = a.dist();
+      integer lda = a.stride();
       integer info;
 
       // int dgetri_(integer *n, doublereal *a, integer *lda, 

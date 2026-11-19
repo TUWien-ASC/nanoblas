@@ -15,11 +15,11 @@ namespace nanoblas
   protected:
     T* m_data;
     size_t m_rows, m_cols;
-    size_t m_dist;
+    size_t m_stride;
 
     size_t index(size_t i, size_t j) const
     {
-      return (ORD==RowMajor) ? i*m_dist+j : j*m_dist+i;
+      return (ORD==RowMajor) ? i*m_stride+j : j*m_stride+i;
     }
   public:
     MatrixView() = default;
@@ -28,15 +28,15 @@ namespace nanoblas
     MatrixView (size_t rows, size_t cols, T* data)
       : m_data(data), m_rows(rows), m_cols(cols)
     {
-      m_dist = (ORD==RowMajor) ? m_cols : m_rows;
+      m_stride = (ORD==RowMajor) ? m_cols : m_rows;
     }
     
-    MatrixView (size_t rows, size_t cols, size_t dist, T* data)
-      : m_data(data), m_rows(rows), m_cols(cols), m_dist(dist) { }
+    MatrixView (size_t rows, size_t cols, size_t stride, T* data)
+      : m_data(data), m_rows(rows), m_cols(cols), m_stride(stride) { }
     
     template <typename TB>
     MatrixView (const MatrixView<TB,ORD>& m2)
-      : m_data(m2.data()), m_rows(m2.rows()), m_cols(m2.cols()), m_dist(m2.dist()) { }
+      : m_data(m2.data()), m_rows(m2.rows()), m_cols(m2.cols()), m_stride(m2.stride()) { }
 
 
     MatrixView& operator= (const MatrixView& m2)
@@ -67,7 +67,7 @@ namespace nanoblas
     T* data() const { return m_data; }
     size_t rows() const { return m_rows; }
     size_t cols() const { return m_cols; }
-    size_t dist() const { return m_dist; }
+    size_t stride() const { return m_stride; }
     auto shape() const { return std::array<size_t,2>{m_rows, m_cols}; }
 
     T& operator()(size_t i, size_t j) 
@@ -111,32 +111,32 @@ namespace nanoblas
     auto row(size_t i) const 
     {
       if constexpr (ORD == RowMajor)
-        return VectorView<T>(m_cols, m_data + i*m_dist);
+        return VectorView<T>(m_cols, m_data + i*m_stride);
       else
-        return VectorView<T,size_t>(m_cols, m_dist, m_data + i);
+        return VectorView<T,size_t>(m_cols, m_stride, m_data + i);
     } 
 
     auto col(size_t j) const 
     {
       if constexpr (ORD == RowMajor)
-        return VectorView<T,size_t>(m_rows, m_dist, m_data + j);
+        return VectorView<T,size_t>(m_rows, m_stride, m_data + j);
       else
-        return VectorView<T>(m_rows, m_data + j*m_dist);
+        return VectorView<T>(m_rows, m_data + j*m_stride);
     }
 
     auto diag() const 
     {
-      return VectorView<T,size_t>(std::min(m_rows, m_cols), m_dist+1, m_data);
+      return VectorView<T,size_t>(std::min(m_rows, m_cols), m_stride+1, m_data);
     } 
 
-    auto rows(size_t first, size_t next) const 
+    auto rowRange(size_t first, size_t next) const 
     {
-      return MatrixView<T, ORD>(next - first, m_cols, m_dist, m_data+index(first,0));
+      return MatrixView<T, ORD>(next - first, m_cols, m_stride, m_data+index(first,0));
     }
 
-    auto cols(size_t first, size_t next) const 
+    auto colRange(size_t first, size_t next) const 
     {
-      return MatrixView<T, ORD>(m_rows, next - first, m_dist, m_data+index(0,first));
+      return MatrixView<T, ORD>(m_rows, next - first, m_stride, m_data+index(0,first));
     }
   };
 
@@ -145,9 +145,9 @@ namespace nanoblas
   auto trans (MatrixView<T,ORD> mat)
   {
     if constexpr (ORD==RowMajor)
-      return MatrixView<T,ColMajor>(mat.cols(), mat.rows(), mat.dist(), mat.data());
+      return MatrixView<T,ColMajor>(mat.cols(), mat.rows(), mat.stride(), mat.data());
     else
-      return MatrixView<T,RowMajor>(mat.cols(), mat.rows(), mat.dist(), mat.data());
+      return MatrixView<T,RowMajor>(mat.cols(), mat.rows(), mat.stride(), mat.data());
   }
   
   template <typename T=double, ORDERING ORD=RowMajor>

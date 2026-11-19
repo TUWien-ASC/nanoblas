@@ -17,32 +17,32 @@ namespace nanoblas
 
 
   
-  template <typename T=double, typename TDIST = std::integral_constant<size_t,1> >
-  class VectorView : public VecExpr<VectorView<T,TDIST>>
+  template <typename T=double, typename TSTRIDE = std::integral_constant<size_t,1> >
+  class VectorView : public VecExpr<VectorView<T,TSTRIDE>>
   {
   protected:
     T* m_data;
     size_t m_size;
-    TDIST m_dist;
+    TSTRIDE m_stride;
     
   public:
     VectorView() = default;
     VectorView(const VectorView&) = default;
     
-    template <typename TDIST2>
-    VectorView (const VectorView<T,TDIST2>& v2)
-      : m_data(v2.data()), m_size(v2.size()), m_dist(v2.dist()) { }
+    template <typename TSTRIDE2>
+    VectorView (const VectorView<T,TSTRIDE2>& v2)
+      : m_data(v2.data()), m_size(v2.size()), m_stride(v2.stride()) { }
     
     VectorView (size_t size, T* data)
       : m_data(data), m_size(size) { }
     
-    VectorView (size_t size, TDIST dist, T* data)
-      : m_data(data), m_size(size), m_dist(dist) { }
+    VectorView (size_t size, TSTRIDE stride, T* data)
+      : m_data(data), m_size(size), m_stride(stride) { }
     
     VectorView operator= (const VectorView& v2)
     {
       for (size_t i = 0; i < m_size; i++)
-        m_data[m_dist*i] = v2(i);
+        m_data[m_stride*i] = v2(i);
       return *this;
     }
 
@@ -50,21 +50,21 @@ namespace nanoblas
     VectorView operator= (const VecExpr<TB>& v2)
     {
       for (size_t i = 0; i < m_size; i++)
-        m_data[m_dist*i] = v2(i);
+        m_data[m_stride*i] = v2(i);
       return *this;
     }
 
     VectorView operator= (T scal)
     {
       for (size_t i = 0; i < m_size; i++)
-        m_data[m_dist*i] = scal;
+        m_data[m_stride*i] = scal;
       return *this;
     }
 
     VectorView operator= (const std::vector<T>& v2)
     {
       for (size_t i = 0; i < m_size; i++)
-        m_data[m_dist*i] = v2[i];
+        m_data[m_stride*i] = v2[i];
       return *this;
     }
 
@@ -72,26 +72,26 @@ namespace nanoblas
     {
       std::vector<T> v2(m_size);
       for (size_t i = 0; i < m_size; i++)
-        v2[i] = m_data[m_dist*i];
+        v2[i] = m_data[m_stride*i];
       return v2;
     }
 
     T * data() const { return m_data; }
     size_t size() const { return m_size; }
-    auto dist() const { return m_dist; }
+    auto stride() const { return m_stride; }
     
-    T& operator()(size_t i) { return m_data[m_dist*i]; }
-    const T& operator()(size_t i) const { return m_data[m_dist*i]; }
+    T& operator()(size_t i) { return m_data[m_stride*i]; }
+    const T& operator()(size_t i) const { return m_data[m_stride*i]; }
     
-    T& operator[](size_t i) { return m_data[m_dist*i]; }
-    const T& operator[](size_t i) const { return m_data[m_dist*i]; }
+    T& operator[](size_t i) { return m_data[m_stride*i]; }
+    const T& operator[](size_t i) const { return m_data[m_stride*i]; }
     
     auto range(size_t first, size_t next) const {
-      return VectorView(next-first, m_dist, m_data+first*m_dist);
+      return VectorView(next-first, m_stride, m_data+first*m_stride);
     }
 
     auto slice(size_t first, size_t slice) const {
-      return VectorView<T,size_t> ((m_size-first+slice-1)/slice, m_dist*slice, m_data+first*m_dist);
+      return VectorView<T,size_t> ((m_size-first+slice-1)/slice, m_stride*slice, m_data+first*m_stride);
     }
 
     auto asMatrix(size_t rows, size_t cols) const {
@@ -102,7 +102,7 @@ namespace nanoblas
     VectorView& operator+= (const VecExpr<TB>& v2)
     {
       for (size_t i = 0; i < m_size; i++)
-        m_data[m_dist*i] += v2(i);
+        m_data[m_stride*i] += v2(i);
       return *this;
     }
 
@@ -110,14 +110,14 @@ namespace nanoblas
     VectorView& operator-= (const VecExpr<TB>& v2)
       {
         for (size_t i = 0; i < m_size; i++)
-          m_data[m_dist*i] -= v2(i);
+          m_data[m_stride*i] -= v2(i);
         return *this;
       }
 
     VectorView& operator*= (T scal)
     {
       for (size_t i = 0; i < m_size; i++)
-        m_data[m_dist*i] *= scal;
+        m_data[m_stride*i] *= scal;
       return *this;
     }
     
