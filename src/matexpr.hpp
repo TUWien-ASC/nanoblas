@@ -21,7 +21,7 @@ namespace nanoblas
   class MatExpr
   {
   public:
-    auto derived() const { return static_cast<const T&> (*this); }
+    const T & derived() const { return static_cast<const T&> (*this); }
     size_t rows() const { return derived().rows(); }
     size_t cols() const { return derived().cols(); }
     auto shape() const { return derived().shape(); }

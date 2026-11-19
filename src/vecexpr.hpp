@@ -24,7 +24,7 @@ namespace nanoblas
   class VecExpr
   {
   public:
-    auto derived() const { return static_cast<const T&> (*this); }
+    const T & derived() const { return static_cast<const T&> (*this); }
     size_t size() const { return derived().size(); }
     auto operator() (size_t i) const { return derived()(i); }
   };
