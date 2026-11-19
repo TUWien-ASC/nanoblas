@@ -91,7 +91,7 @@ namespace nanoblas
     }
 
     auto slice(size_t first, size_t slice) const {
-      return VectorView<T,size_t> (m_size/slice, m_dist*slice, m_data+first*m_dist);
+      return VectorView<T,size_t> ((m_size-first+slice-1)/slice, m_dist*slice, m_data+first*m_dist);
     }
 
     auto asMatrix(size_t rows, size_t cols) const {

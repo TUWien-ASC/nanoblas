@@ -52,7 +52,7 @@ namespace nanoblas
     TB b;
   public:
     SumMatExpr (TA _a, TB _b) : a(_a), b(_b) { }
-    auto operator() (size_t i) const { return a(i)+b(i); }
+    auto operator() (size_t i, size_t j) const { return a(i,j)+b(i,j); }
     size_t rows() const { return a.rows(); }
     size_t cols() const { return a.cols(); }  
     auto shape() const { return a.shape(); }    

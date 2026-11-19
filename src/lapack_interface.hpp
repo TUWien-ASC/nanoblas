@@ -68,8 +68,9 @@ namespace nanoblas
   {
     char transa = (ORD == ColMajor) ? 'N' : 'T';
 
-    integer n = a.rows();
-    integer m = a.cols();
+    // dimensions of the column-major matrix seen by BLAS
+    integer n = (ORD == ColMajor) ? a.rows() : a.cols();
+    integer m = (ORD == ColMajor) ? a.cols() : a.rows();
     integer lda = std::max<size_t>(a.dist(), 1);
 
     integer dx = std::max<size_t>(x.dist(), 1);

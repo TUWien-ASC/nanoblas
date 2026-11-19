@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <utility>
+#include <cmath>
+#include <stdexcept>
 
 #include <matrix.hpp>
 
@@ -21,59 +23,59 @@ namespace nanoblas {
 
     for (size_t j = 0; j < n; j++)
       {
-	// pivot search
-	double maxval = abs(mat(j,j));
-	size_t r = j;
+        // pivot search
+        double maxval = std::abs(mat(j,j));
+        size_t r = j;
 
-	for (size_t i = j+1; i < n; i++)
-	  if (abs (mat(j, i)) > maxval)
-	    {
-	      r = i;
-	      maxval = abs (mat(r, i));
-	    }
+        for (size_t i = j+1; i < n; i++)
+          if (std::abs (mat(j, i)) > maxval)
+            {
+              r = i;
+              maxval = std::abs (mat(j, i));
+            }
       
         double rest = 0.0;
         for (size_t i = j+1; i < n; i++)
-          rest += abs(mat(r, i));
-	if (maxval < 1e-20*rest)
+          rest += std::abs(mat(r, i));
+        if (maxval < 1e-20*rest)
           throw std::runtime_error("Inverse matrix: Matrix singular");
 
 
-	// exchange rows
-	if (r > j)
-	  {
-	    for (size_t k = 0; k < n; k++)
-	      std::swap (mat(k, j), mat(k, r));
-	    std::swap (p[j], p[r]);
-	  }
+        // exchange rows
+        if (r > j)
+          {
+            for (size_t k = 0; k < n; k++)
+              std::swap (mat(k, j), mat(k, r));
+            std::swap (p[j], p[r]);
+          }
       
 
-	// transformation
-	
-	T hr = 1.0 / mat(j,j);
-	for (size_t i = 0; i < n; i++)
+        // transformation
+        
+        T hr = 1.0 / mat(j,j);
+        for (size_t i = 0; i < n; i++)
           mat(j,i) *= hr;
-	mat(j,j) = hr;
+        mat(j,j) = hr;
 
-	for (size_t k = 0; k < n; k++)
-	  if (k != j)
-	    {
-	      T help = mat(k,j);
-	      T h = help * hr;   
+        for (size_t k = 0; k < n; k++)
+          if (k != j)
+            {
+              T help = mat(k,j);
+              T h = help * hr;   
 
-	      for (size_t i = 0; i < n; i++)
+              for (size_t i = 0; i < n; i++)
                 mat(k,i) -= help * mat(j,i); 
 
-	      mat(k,j) = -h;
-	    }
+              mat(k,j) = -h;
+            }
       }
 
     // row exchange
     std::vector<T> hv(n);
     for (size_t i = 0; i < n; i++)
       {
-	for (size_t k = 0; k < n; k++) hv[p[k]] = mat(k, i);
-	for (size_t k = 0; k < n; k++) mat(k, i) = hv[k];
+        for (size_t k = 0; k < n; k++) hv[p[k]] = mat(k, i);
+        for (size_t k = 0; k < n; k++) mat(k, i) = hv[k];
       }
 
   }

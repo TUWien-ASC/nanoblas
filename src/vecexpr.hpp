@@ -2,6 +2,7 @@
 #define FILE_EXPRESSION
 
 #include<complex>
+#include<cmath>
 #include<cassert>
 #include <type_traits>
 
@@ -157,19 +158,17 @@ namespace nanoblas
   
   // **************** euclidean norm of vector *****************
 
-  double norm2 (double x) { return x*x; }
-  double norm2 (std::complex<double> x) { return x.real()*x.real() + x.imag()*x.imag(); }
+  inline double norm2 (double x) { return x*x; }
+  inline double norm2 (std::complex<double> x) { return x.real()*x.real() + x.imag()*x.imag(); }
 
-  
+
   template <typename TA>
-  auto norm (const VecExpr<TA>& a)
+  double norm (const VecExpr<TA>& a)
   {
-    using elemtype = typename std::remove_cvref<typename std::invoke_result<TA,size_t>::type>::type;
-
-    elemtype sum = 0;
+    double sum = 0;
     for (size_t i = 0; i < a.size(); i++)
       sum += norm2(a(i));
-    return sqrt(sum);
+    return std::sqrt(sum);
   }
 
   

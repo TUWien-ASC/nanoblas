@@ -34,8 +34,8 @@ namespace nanoblas
     MatrixView (size_t rows, size_t cols, size_t dist, T* data)
       : m_data(data), m_rows(rows), m_cols(cols), m_dist(dist) { }
     
-    template <typename TB, ORDERING ORD2>
-    MatrixView (const MatrixView<TB,ORD2>& m2)
+    template <typename TB>
+    MatrixView (const MatrixView<TB,ORD>& m2)
       : m_data(m2.data()), m_rows(m2.rows()), m_cols(m2.cols()), m_dist(m2.dist()) { }
 
 
